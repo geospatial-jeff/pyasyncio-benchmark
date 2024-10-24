@@ -1,0 +1,7 @@
+version: '3'
+services:
+  # Benchmark runner
+  benchmark-runner:
+    image: pyasyncio-benchmark:latest
+    deploy:
+      replicas: 10
