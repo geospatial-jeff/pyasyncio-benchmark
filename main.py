@@ -2,10 +2,6 @@ import asyncio
 from benchmark import scheduling
 from benchmark.synchronization import semaphore
 
-from aiodecorators import Semaphore
-
-
-
 
 @semaphore(10)
 async def fut():
