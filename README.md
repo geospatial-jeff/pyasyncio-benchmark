@@ -7,6 +7,7 @@ Benchmark python coroutines in various ways
 Run via docker:
 
 ```shell
+npx http-server
 docker build . -t pyasyncio-benchmark:latest
-docker run --rm -v main.py:/var/task/ -it benchmark:latest python /var/task/main.py
+docker-compose up -d
 ```
