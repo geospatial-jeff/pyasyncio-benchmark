@@ -26,10 +26,11 @@ async def main():
     # Send 10,000 header requests
     futures = (fut(store) for _ in range(10000))
 
-    # Schedule them again
+    # Schedule them using a gather.
+    # Memory usage is O(10000).
+    # Requests are executed 500 at a time (because of the semaphore).
     await scheduling.gather(futures)
 
-    # await scheduling.queue((fut(store) for _ in range(10000)), num_workers=100)
 
 if __name__ == "__main__":
     # Run the script.
