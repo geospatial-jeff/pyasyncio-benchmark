@@ -11,7 +11,3 @@ COPY poetry.lock poetry.lock
 RUN poetry config virtualenvs.create false --local
 RUN poetry install
 COPY benchmark benchmark
-
-COPY main.py main.py
-
-ENTRYPOINT python main.py
