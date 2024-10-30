@@ -1,3 +1,7 @@
+"""
+Requires running a webserver on local port 8080.
+For example - `npx http-server`
+"""
 import asyncio
 import sys
 import time
