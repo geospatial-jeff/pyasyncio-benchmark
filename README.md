@@ -9,13 +9,12 @@ Run the monitoring stack:
 docker compose -f docker-compose.monitoring.yml up
 ```
 
-Go to `localhost:8080` for the cAdvisor dashboard.
+Go to `localhost:8080` for the cAdvisor dashboard to view CPU, memory, and network metrics.
 
 
-Slam a http server with requests:
-
+Run a test.  This runs `main.py` across 10 containers (processes).  Make sure to rebuild the container
+after modifying `main.py`.
 ```shell
-npx http-server
 docker build . -t pyasyncio-benchmark:latest
-docker-compose up -d
+docker compose up -d
 ```
