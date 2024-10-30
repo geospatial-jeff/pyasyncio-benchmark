@@ -5,11 +5,13 @@ description = "Benchmark python coroutines in various ways"
 authors = ["geospatial-jeff <geospatialjeff@gmail.com>"]
 license = "apache"
 readme = "README.md"
+packages = [{include = "benchmark"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
 obstore = "^0.2.0"
 boto3 = "^1.35.51"
+aiohttp = "^3.10.10"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.0.1"

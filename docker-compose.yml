@@ -5,3 +5,7 @@ services:
     image: pyasyncio-benchmark:latest
     deploy:
       replicas: 10
+    entrypoint:
+      - python
+      - -m
+      - benchmark.tests.${TEST_NAME}

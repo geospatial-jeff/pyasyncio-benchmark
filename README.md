@@ -12,9 +12,8 @@ docker compose -f docker-compose.monitoring.yml up
 Go to `localhost:8080` for the cAdvisor dashboard to view CPU, memory, and network metrics.
 
 
-Run a test.  This runs `main.py` across 10 containers (processes).  Make sure to rebuild the container
-after modifying `main.py`.
+Run a test.  `TEST_NAME` may be set to any file in `benchmark/tests/`.
 ```shell
 docker build . -t pyasyncio-benchmark:latest
-docker compose up -d
+TEST_NAME=obstore_cog_header docker compose up -d
 ```
