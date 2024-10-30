@@ -5,6 +5,7 @@ description = "Benchmark python coroutines in various ways"
 authors = ["geospatial-jeff <geospatialjeff@gmail.com>"]
 license = "apache"
 readme = "README.md"
+packages = [{include = "benchmark"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
