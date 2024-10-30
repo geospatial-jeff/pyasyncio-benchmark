@@ -4,7 +4,15 @@ Benchmark python coroutines in various ways
 
 # Usage
 
-Run via docker:
+Run the monitoring stack:
+```shell
+docker compose -f docker-compose.monitoring.yml up
+```
+
+Go to `localhost:8080` for the cAdvisor dashboard.
+
+
+Slam a http server with requests:
 
 ```shell
 npx http-server
