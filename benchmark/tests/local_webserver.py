@@ -22,12 +22,10 @@ async def fut(session: aiohttp.ClientSession):
         print(f"Finished request in {time.time() - start} seconds!")
 
 
-async def main():
+async def run():
     async with aiohttp.ClientSession() as session:
         await scheduling.queue((fut(session) for _ in range(1000)), num_workers=100)
     
 
-if __name__ == "__main__":
-    print("starting!")
-    asyncio.run(main())
-    sys.exit(1)
+def main():
+    asyncio.run(run())

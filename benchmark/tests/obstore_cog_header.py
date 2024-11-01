@@ -19,7 +19,7 @@ async def fut(store: obs.store.S3Store):
     await obs.get_range_async(store, key, offset=0, length=16384)
 
 
-async def main():
+async def run():
     # Create the store.
     store = S3Store.from_env("sentinel-cogs", config={"AWS_REGION": "us-west-2", "SKIP_SIGNATURE": "true"})
 
@@ -32,9 +32,6 @@ async def main():
     await scheduling.gather(futures)
 
 
-if __name__ == "__main__":
+def main():
     # Run the script.
-    asyncio.run(main())
-
-    # Exit signal kills the container when it's done sending requests.
-    sys.exit(1)
+    asyncio.run(run())
