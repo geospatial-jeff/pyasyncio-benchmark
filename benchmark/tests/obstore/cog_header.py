@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 
 from obstore.store import S3Store
 import obstore as obs
@@ -31,9 +32,13 @@ async def run():
     # Schedule them using a gather.
     # Memory usage is O(10000).
     # Requests are executed 500 at a time (because of the semaphore).
+    start_time = datetime.utcnow()
     await scheduling.gather(futures)
+    end_time = datetime.utcnow()
+
+    return start_time, end_time
 
 
 def main():
     # Run the script.
-    asyncio.run(run())
+    return asyncio.run(run())
