@@ -2,6 +2,7 @@ import argparse
 from importlib import import_module
 import sys
 
+
 def run_test(test_name: str):
     mod = import_module(f"benchmark.tests.{test_name}")
     mod.main()
@@ -13,7 +14,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     run_test(args.test_name)
-    
+
     # Kill the container
     sys.exit(1)
-    
