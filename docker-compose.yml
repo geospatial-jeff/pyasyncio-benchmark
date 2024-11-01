@@ -8,4 +8,5 @@ services:
     command:
       - python
       - main.py
+      - ${LIBRARY_NAME}
       - ${TEST_NAME}
