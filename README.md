@@ -15,5 +15,5 @@ Go to `localhost:8080` for the cAdvisor dashboard to view CPU, memory, and netwo
 Run a test.  `TEST_NAME` may be set to any file in `benchmark/tests/`.
 ```shell
 docker build . -t pyasyncio-benchmark:latest
-TEST_NAME=obstore_cog_header docker compose up -d
+LIBRARY_NAME=obstore TEST_NAME=cog_header docker compose up -d
 ```
