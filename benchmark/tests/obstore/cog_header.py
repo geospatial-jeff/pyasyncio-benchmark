@@ -6,6 +6,7 @@ import obstore as obs
 
 from benchmark import scheduling
 from benchmark.synchronization import semaphore
+from benchmark.crud import WorkerState
 
 
 key = "sentinel-s2-l2a-cogs/50/C/MA/2021/1/S2A_50CMA_20210121_0_L2A/B08.tif"
@@ -36,7 +37,7 @@ async def run():
     await scheduling.gather(futures)
     end_time = datetime.utcnow()
 
-    return start_time, end_time
+    return WorkerState(start_time, end_time)
 
 
 def main():

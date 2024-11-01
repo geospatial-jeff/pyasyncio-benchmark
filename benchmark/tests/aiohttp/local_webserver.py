@@ -4,11 +4,13 @@ For example - `npx http-server`
 """
 
 import asyncio
+from datetime import datetime
 import time
 
 import aiohttp
 
 from benchmark import scheduling
+from benchmark.crud import WorkerState
 from benchmark.synchronization import semaphore
 
 
@@ -23,8 +25,12 @@ async def fut(session: aiohttp.ClientSession):
 
 async def run():
     async with aiohttp.ClientSession() as session:
+        start_time = datetime.utcnow()
         await scheduling.queue((fut(session) for _ in range(1000)), num_workers=100)
+        end_time = datetime.utcnow()
+
+    return WorkerState(start_time, end_time)
 
 
 def main():
-    asyncio.run(run())
+    return asyncio.run(run())

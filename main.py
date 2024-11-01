@@ -1,20 +1,18 @@
 import argparse
-import uuid
-import sqlite3
 from importlib import import_module
 import sys
+import sqlite3
 
 
-def run_test(library_name: str, test_name: str, worker_id: str):
+from benchmark.crud import insert_row, WorkerState
+
+
+def run_test(library_name: str, test_name: str):
     mod = import_module(f"benchmark.tests.{library_name}.{test_name}")
-    start_time, end_time = mod.main()
+    worker_state: WorkerState = mod.main()
 
-    # Track state about each worker
-    sql = "INSERT INTO workers VALUES (?,?,?,?,?)"
     with sqlite3.connect("sqlite.db") as conn:
-        cur = conn.cursor()
-        cur.execute(sql, (library_name, test_name, start_time, end_time, worker_id))
-        conn.commit()
+        insert_row(conn, library_name, test_name, worker_state)
 
 
 if __name__ == "__main__":
@@ -23,8 +21,7 @@ if __name__ == "__main__":
     parser.add_argument("test_name")
     args = parser.parse_args()
 
-    worker_id = str(uuid.uuid4())
-    run_test(args.library_name, args.test_name, worker_id)
+    run_test(args.library_name, args.test_name)
 
     # Kill the container
     sys.exit(1)

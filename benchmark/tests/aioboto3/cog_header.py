@@ -1,10 +1,12 @@
 import asyncio
+from datetime import datetime
 
 import aioboto3
 from botocore import UNSIGNED
 from botocore.config import Config
 
 from benchmark import scheduling
+from benchmark.crud import WorkerState
 from benchmark.synchronization import semaphore
 
 
@@ -34,9 +36,13 @@ async def run():
         # Schedule them using a gather.
         # Memory usage is O(10000).
         # Requests are executed 500 at a time (because of the semaphore).
+        start_time = datetime.utcnow()
         await scheduling.gather(futures)
+        end_time = datetime.utcnow()
+
+    return WorkerState(start_time, end_time)
 
 
 def main():
     # Run the script.
-    asyncio.run(run())
+    return asyncio.run(run())
