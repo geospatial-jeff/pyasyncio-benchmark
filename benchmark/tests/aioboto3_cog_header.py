@@ -1,5 +1,4 @@
 import asyncio
-import sys
 
 import aioboto3
 from botocore import UNSIGNED
@@ -11,21 +10,24 @@ from benchmark.synchronization import semaphore
 
 key = "sentinel-s2-l2a-cogs/50/C/MA/2021/1/S2A_50CMA_20210121_0_L2A/B08.tif"
 
+
 @semaphore(500)
 async def fut(s3_client):
     """Request the first 16KB of a file, simulating COG header request.
-    
+
     Semaphore allows this function to be called 500 times concurrently
     """
-    resp = await s3_client.get_object(Bucket="sentinel-cogs", Key=key, Range='bytes=0-16384')
-    await resp['Body'].read()
+    resp = await s3_client.get_object(
+        Bucket="sentinel-cogs", Key=key, Range="bytes=0-16384"
+    )
+    await resp["Body"].read()
 
 
-async def main():
+async def run():
     session = aioboto3.Session()
-    async with session.client("s3", config=Config(signature_version=UNSIGNED)) as s3_client:
-
-
+    async with session.client(
+        "s3", config=Config(signature_version=UNSIGNED)
+    ) as s3_client:
         # Send 10,000 header requests
         futures = (fut(s3_client) for _ in range(10000))
 
@@ -35,9 +37,6 @@ async def main():
         await scheduling.gather(futures)
 
 
-if __name__ == "__main__":
+def main():
     # Run the script.
-    asyncio.run(main())
-
-    # Exit signal kills the container when it's done sending requests.
-    sys.exit(1)
+    asyncio.run(run())

@@ -1,7 +1,7 @@
 """Various ways of scheduling coroutines on an event loop."""
+
 import asyncio
 from typing import Any, Iterable, Coroutine, Generator
-
 
 
 async def gather(futs: Iterable[Coroutine]):
@@ -42,6 +42,6 @@ async def queue(futs: Iterable[Coroutine], num_workers: int = 3):
     # Cancel our worker tasks.
     for worker in workers:
         worker.cancel()
-    
+
     # Wait until all worker tasks are cancelled.
     await asyncio.gather(*workers, return_exceptions=True)
