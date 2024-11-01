@@ -3,6 +3,10 @@ Benchmark python coroutines in various ways
 
 
 # Usage
+Deploy the sqlite database:
+```shell
+db_url=sqlite:///sqlite.db alembic upgrade head
+```
 
 Run the monitoring stack:
 ```shell

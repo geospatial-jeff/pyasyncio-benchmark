@@ -1,10 +1,12 @@
 import asyncio
+from datetime import datetime
 
 from obstore.store import S3Store
 import obstore as obs
 
 from benchmark import scheduling
 from benchmark.synchronization import semaphore
+from benchmark.crud import WorkerState
 
 
 key = "sentinel-s2-l2a-cogs/50/C/MA/2021/1/S2A_50CMA_20210121_0_L2A/B08.tif"
@@ -31,9 +33,13 @@ async def run():
     # Schedule them using a gather.
     # Memory usage is O(10000).
     # Requests are executed 500 at a time (because of the semaphore).
+    start_time = datetime.utcnow()
     await scheduling.gather(futures)
+    end_time = datetime.utcnow()
+
+    return WorkerState(start_time, end_time)
 
 
 def main():
     # Run the script.
-    asyncio.run(run())
+    return asyncio.run(run())

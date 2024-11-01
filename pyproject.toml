@@ -13,6 +13,7 @@ obstore = "^0.2.0"
 boto3 = "*"
 aiohttp = "^3.10.10"
 aioboto3 = "^13.2.0"
+alembic = "^1.13.3"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.0.1"
