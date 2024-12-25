@@ -23,12 +23,12 @@ Run a test:
 
 ## PromQL
 
-CPU utilization:
+Network I/O:
 ```
  sum by (container_label_TAG) (rate(container_network_receive_bytes_total{image="pyasyncio-benchmark:latest"}[15s]))
 ```
 
-Network I/O
+CPU Utilization:
 ```
  sum by (container_label_TAG) (rate(container_cpu_user_seconds_total{image="pyasyncio-benchmark:latest"}[15s]))
 ```
