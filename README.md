@@ -21,3 +21,15 @@ Run a test.  `TEST_NAME` may be set to any file in `benchmark/tests/`.
 docker build . -t pyasyncio-benchmark:latest
 LIBRARY_NAME=obstore TEST_NAME=cog_header docker compose up -d
 ```
+
+## PromQL
+
+CPU utilization:
+```
+ sum by (image) (rate(container_network_receive_bytes_total{image="pyasyncio-benchmark:latest"}[15s]))
+```
+
+Network I/O
+```
+ sum by (image) (rate(container_cpu_user_seconds_total{image="pyasyncio-benchmark:latest"}[15s]))
+```
