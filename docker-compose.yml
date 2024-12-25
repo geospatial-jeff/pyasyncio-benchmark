@@ -7,10 +7,5 @@ services:
       replicas: 2
     environment:
       DB_FILEPATH: "/var/data/sqlite.db"
-    command:
-      - python
-      - main.py
-      - ${LIBRARY_NAME}
-      - ${TEST_NAME}
     volumes:
       - ${PWD}/sqlite.db:/var/data/sqlite.db
