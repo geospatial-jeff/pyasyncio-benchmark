@@ -26,10 +26,10 @@ LIBRARY_NAME=obstore TEST_NAME=cog_header docker compose up -d
 
 CPU utilization:
 ```
- sum by (image) (rate(container_network_receive_bytes_total{image="pyasyncio-benchmark:latest"}[15s]))
+ sum by (container_label_LIBRARY_NAME) (rate(container_network_receive_bytes_total{image="pyasyncio-benchmark:latest"}[15s]))
 ```
 
 Network I/O
 ```
- sum by (image) (rate(container_cpu_user_seconds_total{image="pyasyncio-benchmark:latest"}[15s]))
+ sum by (container_label_LIBRARY_NAME) (rate(container_cpu_user_seconds_total{image="pyasyncio-benchmark:latest"}[15s]))
 ```
