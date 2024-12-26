@@ -55,5 +55,5 @@ def summarize():
 
             query = 'sum by (container_label_TAG) (rate(container_network_receive_bytes_total{image="pyasyncio-benchmark:latest"}[15s]))'
             resp = evaluate_metric(query, start_time, end_time)
-            summary_stats = resp.describe()
+            summary_stats = resp['metric_value'].describe()
             print(summary_stats)
