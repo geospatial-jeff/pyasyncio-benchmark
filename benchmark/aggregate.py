@@ -36,9 +36,7 @@ def evaluate_metric(query: str, start: datetime, end: datetime, step: float = 1)
     return pd.DataFrame(data, columns=["timestamp", "metric_value"])
 
 
-
-def summarize():
-    """Summarize metrics across all test runs."""
+def fetch_test_runs() -> list[sqlite3.Row]:
     with sqlite3.connect(DB_FILEPATH) as conn:
         conn.row_factory = sqlite3.Row
 
@@ -47,13 +45,21 @@ def summarize():
         cur.execute(sql)
         rows = cur.fetchall()
         cur.close()
+    
+    return rows
 
-        for row in rows:
-            # Request data from prometheus
-            start_time = datetime.strptime(row['start_time'], '%Y-%m-%d %H:%M:%S.%f')
-            end_time = datetime.strptime(row['end_time'], '%Y-%m-%d %H:%M:%S.%f')
 
-            query = 'sum by (container_label_TAG) (rate(container_network_receive_bytes_total{image="pyasyncio-benchmark:latest"}[15s]))'
-            resp = evaluate_metric(query, start_time, end_time)
-            summary_stats = resp['metric_value'].describe()
-            print(summary_stats)
+
+
+def summarize():
+    """Summarize metrics across all test runs."""
+    test_runs = fetch_test_runs()
+    for run in test_runs:
+        # Request data from prometheus
+        start_time = datetime.strptime(run['start_time'], '%Y-%m-%d %H:%M:%S.%f')
+        end_time = datetime.strptime(run['end_time'], '%Y-%m-%d %H:%M:%S.%f')
+
+        query = 'sum by (container_label_TAG) (rate(container_network_receive_bytes_total{image="pyasyncio-benchmark:latest"}[15s]))'
+        resp = evaluate_metric(query, start_time, end_time)
+        summary_stats = resp['metric_value'].describe()
+        print(summary_stats)
