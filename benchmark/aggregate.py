@@ -40,17 +40,7 @@ def evaluate_metric(
 def fetch_test_runs() -> list[sqlite3.Row]:
     with sqlite3.connect(DB_FILEPATH) as conn:
         conn.row_factory = sqlite3.Row
-        sql = """
-            SELECT
-                library_name,
-                test_name,
-                MIN(start_time) as start_time,
-                MAX(end_time) as end_time,
-                number_requests,
-                container_id
-            FROM workers
-            GROUP BY library_name, test_name
-        """
+        sql = "SELECT * FROM workers"
         cur = conn.cursor()
         cur.execute(sql)
         rows = cur.fetchall()
