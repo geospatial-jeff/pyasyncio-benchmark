@@ -36,8 +36,9 @@ def run_test(library_name: str, test_name: str):
     worker_state: WorkerState = mod.main()
 
     container_id = get_container_id()
+    run_id = os.environ["RUN_ID"]
     with sqlite3.connect(DB_FILEPATH) as conn:
-        insert_row(conn, library_name, test_name, container_id, worker_state)
+        insert_row(conn, library_name, test_name, container_id, run_id, worker_state)
 
 
 if __name__ == "__main__":

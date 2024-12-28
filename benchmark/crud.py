@@ -17,10 +17,11 @@ def insert_row(
     library_name: str,
     test_name: str,
     container_id: str,
+    run_id: str,
     state: WorkerState,
 ) -> None:
     # Track state about each worker
-    sql = "INSERT INTO workers VALUES (?,?,?,?,?,?,?)"
+    sql = "INSERT INTO workers VALUES (?,?,?,?,?,?,?,?)"
     cur = conn.cursor()
     cur.execute(
         sql,
@@ -32,6 +33,7 @@ def insert_row(
             state.worker_id,
             state.n_requests,
             container_id,
+            run_id,
         ),
     )
     conn.commit()

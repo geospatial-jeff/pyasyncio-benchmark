@@ -29,6 +29,7 @@ def upgrade() -> None:
         sa.Column("worker_id", sa.VARCHAR(16), nullable=False),
         sa.Column("number_requests", sa.INTEGER, nullable=False),
         sa.Column("container_id", sa.VARCHAR, nullable=False),
+        sa.Column("run_id", sa.VARCHAR, nullable=False),
     )
 
 
