@@ -52,20 +52,38 @@ def fetch_test_runs() -> list[sqlite3.Row]:
 def summarize():
     """Summarize metrics across all test runs."""
     test_runs = fetch_test_runs()
-    for run in test_runs:
-        # Request data from prometheus
-        container_id = f"/docker/{run['container_id']}"
 
+    results = []
+    for run in test_runs:
+        container_id = f"/docker/{run['container_id']}"
         start_time = datetime.strptime(run["start_time"], "%Y-%m-%d %H:%M:%S.%f")
         end_time = datetime.strptime(run["end_time"], "%Y-%m-%d %H:%M:%S.%f")
+
+        # Network throughput
+        query = f'sum by (container_label_TAG) (rate(container_network_receive_bytes_total{{id="{container_id}"}}[15s]))'
+        resp = evaluate_metric(query, start_time, end_time)
+        throughput_metrics = (
+            resp["metric_value"]
+            .describe()
+            .add_prefix("recv_bytes_per_second_")
+            .transpose()
+            .to_dict()
+        )
+
         duration_seconds = (end_time - start_time).total_seconds()
         requests_per_second = run["number_requests"] / duration_seconds
 
-        query = f'sum by (container_label_TAG) (rate(container_network_receive_bytes_total{{id="{container_id}"}}[15s]))'
-        resp = evaluate_metric(query, start_time, end_time)
-        summary_stats = resp["metric_value"].describe()
-        print(container_id, duration_seconds, requests_per_second, summary_stats)
+        all_metrics = {
+            **throughput_metrics,
+            "duration_seconds": duration_seconds,
+            "requests_per_second": requests_per_second,
+        }
+
+        results.append(all_metrics)
+
+    return pd.DataFrame.from_records(results)
 
 
 if __name__ == "__main__":
-    summarize()
+    df = summarize()
+    print(df)
