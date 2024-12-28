@@ -19,7 +19,8 @@ def get_container_id() -> str:
         `-v /var/run/docker.sock:/var/run/docker.sock`
 
     The container ID is also exposed by prometheus/cadvisor under the `id` tag
-    (id=`docker/<container_id>`).
+    (id=`docker/<container_id>`).  This is used to correlate each test with the metrics
+    captured by prometheus.
     """
     hostname = os.environ["HOSTNAME"]  # set by docker
     r = requests_unixsocket.get(
