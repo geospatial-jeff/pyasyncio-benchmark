@@ -25,7 +25,7 @@ def evaluate_metric(
     r.raise_for_status()
     resp_json = r.json()
 
-    # Parse results, for convenience
+    # Parse results
     results = resp_json["data"]["result"][0]["values"]
 
     data = []
@@ -40,8 +40,17 @@ def evaluate_metric(
 def fetch_test_runs() -> list[sqlite3.Row]:
     with sqlite3.connect(DB_FILEPATH) as conn:
         conn.row_factory = sqlite3.Row
-
-        sql = "SELECT library_name, test_name, MAX(start_time) as start_time, MIN(end_time) as end_time FROM workers GROUP BY library_name,test_name;"
+        sql = """
+            SELECT
+                library_name,
+                test_name,
+                MIN(start_time) as start_time,
+                MAX(end_time) as end_time,
+                number_requests,
+                container_id
+            FROM workers
+            GROUP BY library_name, test_name
+        """
         cur = conn.cursor()
         cur.execute(sql)
         rows = cur.fetchall()
@@ -55,10 +64,18 @@ def summarize():
     test_runs = fetch_test_runs()
     for run in test_runs:
         # Request data from prometheus
+        container_id = f"/docker/{run['container_id']}"
+
         start_time = datetime.strptime(run["start_time"], "%Y-%m-%d %H:%M:%S.%f")
         end_time = datetime.strptime(run["end_time"], "%Y-%m-%d %H:%M:%S.%f")
+        duration_seconds = (end_time - start_time).total_seconds()
+        requests_per_second = run["number_requests"] / duration_seconds
 
-        query = 'sum by (container_label_TAG) (rate(container_network_receive_bytes_total{image="pyasyncio-benchmark:latest"}[15s]))'
+        query = f'sum by (container_label_TAG) (rate(container_network_receive_bytes_total{{id="{container_id}"}}[15s]))'
         resp = evaluate_metric(query, start_time, end_time)
         summary_stats = resp["metric_value"].describe()
-        print(summary_stats)
+        print(container_id, duration_seconds, requests_per_second, summary_stats)
+
+
+if __name__ == "__main__":
+    summarize()
