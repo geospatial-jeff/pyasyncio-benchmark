@@ -3,7 +3,10 @@ from collections import defaultdict
 import click
 import subprocess
 
+import docker
+
 from benchmark import main
+from benchmark.docker_utils import block_until_container_exits
 
 
 def collect_tests() -> dict:
@@ -78,6 +81,8 @@ def run_test(library_name: str, test_name: str):
 @click.option("--library-name")
 @click.option("--test-name")
 def run_all(library_name: str, test_name: str):
+    docker_client = docker.from_env()
+
     all_tests = collect_tests()
     del all_tests["aiohttp"]
     click.echo(f"Collected tests - {all_tests}")
@@ -86,5 +91,4 @@ def run_all(library_name: str, test_name: str):
             click.echo(f"Running test {library_name}.{test_name}")
             run_test([library_name, test_name], standalone_mode=False)
 
-            # TODO: Block until test finishes somehow.
-            # ideally we don't have to attach.
+            block_until_container_exits(docker_client)
