@@ -104,6 +104,7 @@ def summarize():
             **network_per_cpu_metrics,
             "duration_seconds": duration_seconds,
             "requests_per_second": requests_per_second,
+            "number_requests": run["number_requests"],
         }
 
         results.append(all_metrics)
@@ -115,4 +116,4 @@ def summarize():
 
 if __name__ == "__main__":
     df = summarize()
-    print(df)
+    df.to_csv("test_results.csv", header=True, index=False)
