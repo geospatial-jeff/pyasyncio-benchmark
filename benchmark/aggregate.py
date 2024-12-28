@@ -90,7 +90,7 @@ def summarize():
         network_per_cpu_metrics = (
             resp["metric_value"]
             .describe()
-            .add_prefix("recv_bytes_per_second_per_cpu")
+            .add_prefix("recv_bytes_per_second_per_cpu_")
             .transpose()
             .to_dict()
         )
