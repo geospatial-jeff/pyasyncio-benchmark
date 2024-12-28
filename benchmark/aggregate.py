@@ -61,6 +61,7 @@ def summarize():
 
         # Network throughput
         query = f'sum by (id) (rate(container_network_receive_bytes_total{{id="{container_id}"}}[15s]))'
+        print(query)
         resp = evaluate_metric(query, start_time, end_time)
         throughput_metrics = (
             resp["metric_value"]
@@ -72,6 +73,7 @@ def summarize():
 
         # CPU utilization
         query = f'sum by (id) (rate(container_cpu_user_seconds_total{{id="{container_id}"}}[15s]))'
+        print(query)
         resp = evaluate_metric(query, start_time, end_time)
         cpu_metrics = (
             resp["metric_value"]
@@ -93,6 +95,8 @@ def summarize():
 
         results.append(all_metrics)
 
+    # TODO: Add top level "run-id"
+    # Group results across run-ids
     return pd.DataFrame.from_records(results)
 
 
