@@ -72,3 +72,19 @@ def run_test(library_name: str, test_name: str):
 
     # Run the docker-compose stack
     subprocess.run(["docker", "compose", "up", "-d"])
+
+
+@app.command
+@click.option("--library-name")
+@click.option("--test-name")
+def run_all(library_name: str, test_name: str):
+    all_tests = collect_tests()
+    del all_tests["aiohttp"]
+    click.echo(f"Collected tests - {all_tests}")
+    for library_name, tests in all_tests.items():
+        for test_name in tests:
+            click.echo(f"Running test {library_name}.{test_name}")
+            run_test([library_name, test_name], standalone_mode=False)
+
+            # TODO: Block until test finishes somehow.
+            # ideally we don't have to attach.
