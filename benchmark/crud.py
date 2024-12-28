@@ -13,10 +13,14 @@ class WorkerState:
 
 
 def insert_row(
-    conn: sqlite3.Connection, library_name: str, test_name: str, state: WorkerState
+    conn: sqlite3.Connection,
+    library_name: str,
+    test_name: str,
+    container_id: str,
+    state: WorkerState,
 ) -> None:
     # Track state about each worker
-    sql = "INSERT INTO workers VALUES (?,?,?,?,?,?)"
+    sql = "INSERT INTO workers VALUES (?,?,?,?,?,?,?)"
     cur = conn.cursor()
     cur.execute(
         sql,
@@ -27,6 +31,7 @@ def insert_row(
             state.end_time,
             state.worker_id,
             state.n_requests,
+            container_id,
         ),
     )
     conn.commit()
