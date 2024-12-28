@@ -1,4 +1,3 @@
-import uuid
 import sqlite3
 from datetime import datetime
 from dataclasses import dataclass
@@ -9,7 +8,6 @@ class WorkerState:
     start_time: datetime
     end_time: datetime
     n_requests: int
-    worker_id: str = str(uuid.uuid4())
 
 
 def insert_row(
@@ -21,7 +19,7 @@ def insert_row(
     state: WorkerState,
 ) -> None:
     # Track state about each worker
-    sql = "INSERT INTO workers VALUES (?,?,?,?,?,?,?,?)"
+    sql = "INSERT INTO workers VALUES (?,?,?,?,?,?,?)"
     cur = conn.cursor()
     cur.execute(
         sql,
@@ -30,7 +28,6 @@ def insert_row(
             test_name,
             state.start_time,
             state.end_time,
-            state.worker_id,
             state.n_requests,
             container_id,
             run_id,

@@ -99,12 +99,12 @@ def summarize():
         requests_per_second = run["number_requests"] / duration_seconds
 
         all_metrics = {
+            **run,
             **throughput_metrics,
             **cpu_metrics,
             **network_per_cpu_metrics,
             "duration_seconds": duration_seconds,
             "requests_per_second": requests_per_second,
-            "number_requests": run["number_requests"],
         }
 
         results.append(all_metrics)
