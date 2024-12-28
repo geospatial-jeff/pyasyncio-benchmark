@@ -1,5 +1,4 @@
 import argparse
-import os
 from importlib import import_module
 import sys
 import sqlite3
@@ -7,9 +6,7 @@ import requests_unixsocket
 
 
 from benchmark.crud import insert_row, WorkerState
-
-
-DB_FILEPATH = os.getenv("DB_FILEPATH", "sqlite.db")
+from benchmark.settings import get_settings
 
 
 def get_container_id() -> str:
@@ -22,9 +19,8 @@ def get_container_id() -> str:
     (id=`docker/<container_id>`).  This is used to correlate each test with the metrics
     captured by prometheus.
     """
-    hostname = os.environ["HOSTNAME"]  # set by docker
     r = requests_unixsocket.get(
-        f"http+unix://%2Fvar%2Frun%2Fdocker.sock/containers/{hostname}/json"
+        f"http+unix://%2Fvar%2Frun%2Fdocker.sock/containers/{get_settings().HOSTNAME}/json"
     )
     r.raise_for_status()
     resp_json = r.json()
@@ -36,9 +32,15 @@ def run_test(library_name: str, test_name: str):
     worker_state: WorkerState = mod.main()
 
     container_id = get_container_id()
-    run_id = os.environ["RUN_ID"]
-    with sqlite3.connect(DB_FILEPATH) as conn:
-        insert_row(conn, library_name, test_name, container_id, run_id, worker_state)
+    with sqlite3.connect(get_settings().DB_FILEPATH) as conn:
+        insert_row(
+            conn,
+            library_name,
+            test_name,
+            container_id,
+            get_settings().RUN_ID,
+            worker_state,
+        )
 
 
 if __name__ == "__main__":
