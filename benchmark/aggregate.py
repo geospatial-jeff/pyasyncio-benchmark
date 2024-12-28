@@ -12,7 +12,7 @@ PROMETHEUS_BASE_URL = os.getenv("PROMETHEUS_BASE_URL", "http://localhost:9090")
 def evaluate_metric(
     query: str, start: datetime, end: datetime, step: float = 1
 ) -> pd.DataFrame:
-    """Evaluate the given metric between two time stamps."""
+    """Evaluate the given query between two time stamps."""
     r = requests.get(
         f"{PROMETHEUS_BASE_URL}/api/v1/query_range",
         params={
@@ -38,6 +38,7 @@ def evaluate_metric(
 
 
 def fetch_test_runs() -> list[sqlite3.Row]:
+    """Dump all test runs from the database."""
     with sqlite3.connect(DB_FILEPATH) as conn:
         conn.row_factory = sqlite3.Row
         sql = "SELECT * FROM workers"
