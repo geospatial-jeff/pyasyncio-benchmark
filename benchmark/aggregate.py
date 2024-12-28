@@ -60,7 +60,7 @@ def summarize():
         end_time = datetime.strptime(run["end_time"], "%Y-%m-%d %H:%M:%S.%f")
 
         # Network throughput
-        query = f'sum by (container_label_TAG) (rate(container_network_receive_bytes_total{{id="{container_id}"}}[15s]))'
+        query = f'sum by (id) (rate(container_network_receive_bytes_total{{id="{container_id}"}}[15s]))'
         resp = evaluate_metric(query, start_time, end_time)
         throughput_metrics = (
             resp["metric_value"]
@@ -70,11 +70,23 @@ def summarize():
             .to_dict()
         )
 
+        # CPU utilization
+        query = f'sum by (id) (rate(container_cpu_user_seconds_total{{id="{container_id}"}}[15s]))'
+        resp = evaluate_metric(query, start_time, end_time)
+        cpu_metrics = (
+            resp["metric_value"]
+            .describe()
+            .add_prefix("cpu_seconds_")
+            .transpose()
+            .to_dict()
+        )
+
         duration_seconds = (end_time - start_time).total_seconds()
         requests_per_second = run["number_requests"] / duration_seconds
 
         all_metrics = {
             **throughput_metrics,
+            **cpu_metrics,
             "duration_seconds": duration_seconds,
             "requests_per_second": requests_per_second,
         }
