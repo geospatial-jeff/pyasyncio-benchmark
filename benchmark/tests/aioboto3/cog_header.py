@@ -27,11 +27,12 @@ async def fut(s3_client):
 
 async def run():
     session = aioboto3.Session()
+    n_requests = 10000
     async with session.client(
         "s3", config=Config(signature_version=UNSIGNED)
     ) as s3_client:
         # Send 10,000 header requests
-        futures = (fut(s3_client) for _ in range(10000))
+        futures = (fut(s3_client) for _ in range(n_requests))
 
         # Schedule them using a gather.
         # Memory usage is O(10000).
@@ -40,7 +41,7 @@ async def run():
         await scheduling.gather(futures)
         end_time = datetime.utcnow()
 
-    return WorkerState(start_time, end_time)
+    return WorkerState(start_time, end_time, n_requests)
 
 
 def main():

@@ -27,17 +27,14 @@ async def run():
         "sentinel-cogs", config={"AWS_REGION": "us-west-2", "SKIP_SIGNATURE": "true"}
     )
 
-    # Send 10,000 header requests
-    futures = (fut(store) for _ in range(10000))
+    n_requests = 10000
+    futures = (fut(store) for _ in range(n_requests))
 
-    # Schedule them using a gather.
-    # Memory usage is O(10000).
-    # Requests are executed 500 at a time (because of the semaphore).
     start_time = datetime.utcnow()
     await scheduling.gather(futures)
     end_time = datetime.utcnow()
 
-    return WorkerState(start_time, end_time)
+    return WorkerState(start_time, end_time, n_requests)
 
 
 def main():
