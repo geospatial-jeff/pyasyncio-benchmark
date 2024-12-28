@@ -16,9 +16,13 @@ aioboto3 = "^13.2.0"
 alembic = "^1.13.3"
 requests_unixsocket2 = "^0.4.2"
 pydantic-settings = "^2.7.0"
+click = "^8.1.8"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.0.1"
+
+[tool.poetry.scripts]
+benchmark = "benchmark.cli:app"
 
 [build-system]
 requires = ["poetry-core"]
