@@ -2,7 +2,7 @@ version: '3'
 services:
   # Benchmark runner
   benchmark-runner:
-    image: pyasyncio-benchmark:latest
+    image: pyasyncio-benchmark:${IMAGE_TAG}
     deploy:
       replicas: 1
     environment:
