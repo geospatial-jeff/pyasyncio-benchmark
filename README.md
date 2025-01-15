@@ -1,5 +1,11 @@
 # pyasyncio-benchmark
-Benchmark I/O libraries for geospatial use cases.
+Benchmark I/O libraries for geospatial use cases.  Currently testing:
+- `aioboto3`
+- `aiohttp`
+- `fsspec` (`s3fs`)
+- `httpx`
+- `obstore`
+- `requests`
 
 ## Setup
 Deploy the sqlite database:
