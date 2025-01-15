@@ -77,7 +77,7 @@ db_url=sqlite:///sqlite.db alembic upgrade head
 
 ## Live Monitoring
 
-Prometheus (`localhost:9090`) provides a live view into container metrics as test run.  It is often helpful to have
+Prometheus (`localhost:9090`) provides a live view into container metrics as tests run.  It is often helpful to have
 the prometheus dashboard up in a separate window as tests run.  Prometheus uses a functional query language called PromQL, 
 below are a few useful prometheus queries to look at while running tests, simply:
 1. Go to `localhost:9090`.
