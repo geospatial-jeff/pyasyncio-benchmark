@@ -98,9 +98,9 @@ CPU Utilization:
 rate(container_cpu_user_seconds_total{}[15s])
 ```
 
-Network throughput per cpu:
+Network throughput:
 ```
-rate(container_network_receive_bytes_total{}[15s]) / rate(container_cpu_user_seconds_total{}[15s])
+rate(container_network_receive_bytes_total{}[15s])
 ```
 
 A full list of prometheus metrics available through cAdvisor are available [here](https://github.com/google/cadvisor/blob/master/docs/storage/prometheus.md).
