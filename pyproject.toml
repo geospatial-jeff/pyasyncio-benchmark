@@ -17,6 +17,8 @@ alembic = "^1.13.3"
 requests_unixsocket2 = "^0.4.2"
 pydantic-settings = "^2.7.0"
 click = "^8.1.8"
+docker = "^7.1.0"
+
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.0.1"

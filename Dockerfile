@@ -9,6 +9,7 @@ WORKDIR app
 COPY pyproject.toml pyproject.toml
 COPY poetry.lock poetry.lock
 COPY benchmark benchmark
+COPY README.md README.md
 RUN poetry install
 
 # Add labels to track container-level metrics
