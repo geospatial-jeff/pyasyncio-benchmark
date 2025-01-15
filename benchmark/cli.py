@@ -38,14 +38,6 @@ def app():
 @app.command
 @click.argument("library_name")
 @click.argument("test_name")
-def docker_entrypoint(library_name: str, test_name: str):
-    """Docker entrypoint, don't call this directly."""
-    main.run_test(library_name, test_name)
-
-
-@app.command
-@click.argument("library_name")
-@click.argument("test_name")
 def run_test(library_name: str, test_name: str):
     """Run a single test."""
     all_tests = collect_tests()
@@ -60,13 +52,14 @@ def run_test(library_name: str, test_name: str):
         raise ValueError(f"Test {test_name} not found.")
 
     # Build the container.
+    image_tag = f"{library_name}-{test_name}"
     subprocess.run(
         [
             "docker",
             "build",
             ".",
             "-t",
-            f"pyasyncio-benchmark:{library_name}-{test_name}",
+            f"pyasyncio-benchmark:{image_tag}",
             "--build-arg",
             f"LIBRARY_NAME={library_name}",
             "--build-arg",
@@ -75,13 +68,15 @@ def run_test(library_name: str, test_name: str):
     )
 
     # Run the docker-compose stack
-    subprocess.run(["docker", "compose", "up", "-d"])
+    container_env = os.environ.copy() | {"IMAGE_TAG": image_tag}
+    subprocess.run(["docker", "compose", "up"], env=container_env)
 
 
 @app.command
 @click.option("--library-name")
 @click.option("--test-name")
 def run_all(library_name: str, test_name: str):
+    """Run all available tests."""
     docker_client = docker.from_env()
 
     all_tests = collect_tests()
@@ -98,4 +93,13 @@ def run_all(library_name: str, test_name: str):
 @app.command
 @click.argument("filepath")
 def get_results(filepath: str):
+    """Save test results to CSV file."""
     summarize_test_results().to_csv(filepath, header=True, index=False)
+
+
+@app.command
+@click.argument("library_name")
+@click.argument("test_name")
+def docker_entrypoint(library_name: str, test_name: str):
+    """Docker entrypoint, don't call this directly."""
+    main.run_test(library_name, test_name)
