@@ -18,7 +18,8 @@ async def fut(store: obs.store.S3Store):
 
     Semaphore allows this function to be called 500 times concurrently
     """
-    await obs.get_range_async(store, key, offset=0, length=16384)
+    r = await obs.get_range_async(store, key, offset=0, length=16384)
+    r.as_bytes()
 
 
 async def run():
@@ -27,7 +28,7 @@ async def run():
         "sentinel-cogs", config={"AWS_REGION": "us-west-2", "SKIP_SIGNATURE": "true"}
     )
 
-    n_requests = 10000
+    n_requests = 25000
     futures = (fut(store) for _ in range(n_requests))
 
     start_time = datetime.utcnow()
