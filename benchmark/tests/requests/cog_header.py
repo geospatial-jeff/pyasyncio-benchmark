@@ -30,7 +30,6 @@ def task(session: requests.Session):
     )
     r.raise_for_status()
     r.content
-    breakpoint()
 
 
 @semaphore(500)

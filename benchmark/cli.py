@@ -69,7 +69,7 @@ def run_test(library_name: str, test_name: str):
 
     # Run the docker-compose stack
     container_env = os.environ.copy() | {"IMAGE_TAG": image_tag}
-    subprocess.run(["docker", "compose", "up", "-d"], env=container_env)
+    subprocess.run(["docker", "compose", "up"], env=container_env)
 
 
 @app.command
@@ -80,7 +80,6 @@ def run_all(library_name: str, test_name: str):
     docker_client = docker.from_env()
 
     all_tests = collect_tests()
-    del all_tests["aiohttp"]
     click.echo(f"Collected tests - {all_tests}")
     for library_name, tests in all_tests.items():
         for test_name in tests:
