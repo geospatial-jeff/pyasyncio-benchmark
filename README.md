@@ -1,5 +1,11 @@
 # pyasyncio-benchmark
-Benchmark I/O libraries for geospatial use cases.
+Benchmark I/O libraries for geospatial use cases.  Currently testing:
+- `aioboto3`
+- `aiohttp`
+- `fsspec` (`s3fs`)
+- `httpx`
+- `obstore`
+- `requests`
 
 ## Setup
 Deploy the sqlite database:
@@ -92,9 +98,9 @@ CPU Utilization:
 rate(container_cpu_user_seconds_total{}[15s])
 ```
 
-Network throughput per cpu:
+Network throughput:
 ```
-rate(container_network_receive_bytes_total{}[15s]) / rate(container_cpu_user_seconds_total{}[15s])
+rate(container_network_receive_bytes_total{}[15s])
 ```
 
 A full list of prometheus metrics available through cAdvisor are available [here](https://github.com/google/cadvisor/blob/master/docs/storage/prometheus.md).

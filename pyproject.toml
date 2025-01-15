@@ -19,6 +19,11 @@ pydantic-settings = "^2.7.0"
 click = "^8.1.8"
 docker = "^7.1.0"
 pandas = "^2.2.3"
+requests = "^2.32.3"
+s3fs = "==2024.12.0"
+httpx = "^0.28.1"
+
+
 
 
 [tool.poetry.group.dev.dependencies]
