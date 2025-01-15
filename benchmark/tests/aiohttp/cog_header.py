@@ -1,38 +1,39 @@
 import asyncio
 from datetime import datetime
 
-from obstore.store import S3Store
-import obstore as obs
+import aiohttp
 
 from benchmark import scheduling
-from benchmark.synchronization import semaphore
 from benchmark.crud import WorkerState
+from benchmark.synchronization import semaphore
 
 
 key = "sentinel-s2-l2a-cogs/50/C/MA/2021/1/S2A_50CMA_20210121_0_L2A/B08.tif"
 
 
 @semaphore(500)
-async def fut(store: obs.store.S3Store):
+async def fut(session: aiohttp.ClientSession):
     """Request the first 16KB of a file, simulating COG header request.
 
     Semaphore allows this function to be called 500 times concurrently
     """
-    await obs.get_range_async(store, key, offset=0, length=16384)
+    r = await session.get(
+        f"https://sentinel-cogs.s3.amazonaws.com/{key}",
+        headers={"Range": "bytes=0-16384"},
+    )
+    r.raise_for_status()
+    await r.read()
 
 
 async def run():
-    # Create the store.
-    store = S3Store.from_env(
-        "sentinel-cogs", config={"AWS_REGION": "us-west-2", "SKIP_SIGNATURE": "true"}
-    )
-
     n_requests = 10000
-    futures = (fut(store) for _ in range(n_requests))
+    async with aiohttp.ClientSession() as session:
+        futures = (fut(session) for _ in range(n_requests))
 
-    start_time = datetime.utcnow()
-    await scheduling.gather(futures)
-    end_time = datetime.utcnow()
+        # Schedule them using a gather.
+        start_time = datetime.utcnow()
+        await scheduling.gather(futures)
+        end_time = datetime.utcnow()
 
     return WorkerState(start_time, end_time, n_requests)
 
