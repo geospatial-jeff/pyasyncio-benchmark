@@ -7,6 +7,7 @@ import docker
 
 from benchmark import main
 from benchmark.docker_utils import block_until_container_exits
+from benchmark.aggregate import summarize_test_results
 
 
 def collect_tests() -> dict:
@@ -92,3 +93,9 @@ def run_all(library_name: str, test_name: str):
             run_test([library_name, test_name], standalone_mode=False)
 
             block_until_container_exits(docker_client)
+
+
+@app.command
+@click.argument("filepath")
+def get_results(filepath: str):
+    summarize_test_results().to_csv(filepath, header=True, index=False)

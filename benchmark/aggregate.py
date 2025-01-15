@@ -47,19 +47,19 @@ def fetch_test_runs() -> list[sqlite3.Row]:
     return rows
 
 
-def summarize():
+def summarize_test_results():
     """Summarize metrics across all test runs."""
     test_runs = fetch_test_runs()
 
     results = []
     for run in test_runs:
         container_id = f"/docker/{run['container_id']}"
+        print(f"Fetching metrics for container {container_id}")
         start_time = datetime.strptime(run["start_time"], "%Y-%m-%d %H:%M:%S.%f")
         end_time = datetime.strptime(run["end_time"], "%Y-%m-%d %H:%M:%S.%f")
 
         # Network throughput
         recv_query = f'sum by (id) (rate(container_network_receive_bytes_total{{id="{container_id}"}}[15s]))'
-        print(recv_query)
         resp = evaluate_metric(recv_query, start_time, end_time)
         throughput_metrics = (
             resp["metric_value"]
@@ -109,8 +109,3 @@ def summarize():
     # TODO: Add top level "run-id"
     # Group results across run-ids
     return pd.DataFrame.from_records(results)
-
-
-if __name__ == "__main__":
-    df = summarize()
-    df.to_csv("test_results.csv", header=True, index=False)
