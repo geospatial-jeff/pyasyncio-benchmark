@@ -30,15 +30,15 @@ Options:
   --help  Show this message and exit.
 
 Commands:
-  docker-entrypoint  Docker entrypoint, don't call this directly.
   get-results        Save test results to CSV file.
   run-all            Run all available tests.
+  run-test           Run a single test.
 ```
 
 Tests are run within container(s) managed by a docker-compose stack.  You may change the number
 of replicas used for each test by updating `services.benchmark-runner.deploy.replicas` in
 `docker-compose.yaml` (default is 1). Using a higher number of replicas allows running tests
-at high throughputs through horizontal scaling, assuming the underlying hardware can support it.
+at high throughputs by scaling horizontally, assuming the underlying hardware can support it.
 
 Each test is commited to the repo at `benchmark/tests/{library_name}/{test_name}.py`.  Tests
 are fully self-contained and may run on their own outside of this benchmarking tool.  Please feel
@@ -47,8 +47,13 @@ free to implement your own tests, PRs are welcome!
 ## Test Results
 
 The `benchmark get-results` command fetches results from each test by querying the Prometheus
-metrics server, using information stored by each test in the SQLite database.  This command
-need only be run once after all desired tests have completed.  An end-to-end workflow
+metrics server, using information stored by each test in the SQLite database.
+
+The command creates a CSV file containing summary statistics across throughput/cpu and derived metrics like requests per second.
+At some point I will type up some better documentation on the outputs, hopefully the column names are straight forward enough.
+Note there is one row for each `{library_name} x {test_name} x {replica_count}`.  The library does not (yet) attempt to aggregate metrics across multiple containers.
+
+This command need only be run once after all desired tests have completed.  An end-to-end workflow
 looks like:
 
 ```shell
