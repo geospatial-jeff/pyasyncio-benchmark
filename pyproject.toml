@@ -5,11 +5,11 @@ description = "Benchmark python coroutines in various ways"
 authors = ["geospatial-jeff <geospatialjeff@gmail.com>"]
 license = "apache"
 readme = "README.md"
-packages = [{include = "benchmark"}]
+packages = [{ include = "benchmark" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-obstore = "^0.2.0"
+obstore = "^0.3.0"
 boto3 = "*"
 aiohttp = "^3.10.10"
 aioboto3 = "^13.2.0"
@@ -22,8 +22,6 @@ pandas = "^2.2.3"
 requests = "^2.32.3"
 s3fs = "==2024.12.0"
 httpx = "^0.28.1"
-
-
 
 
 [tool.poetry.group.dev.dependencies]
