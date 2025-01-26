@@ -18,7 +18,8 @@ async def fut(store: obs.store.S3Store):
 
     Semaphore allows this function to be called 500 times concurrently
     """
-    _resp = await obs.get_range_async(store, key, start=0, end=16384)
+    r = await obs.get_range_async(store, key, start=0, end=16384)
+    r.as_bytes()
 
 
 async def run():
