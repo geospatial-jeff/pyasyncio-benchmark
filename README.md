@@ -6,6 +6,7 @@ Benchmark I/O libraries for geospatial use cases.  Currently testing:
 - `httpx`
 - `obstore`
 - `requests`
+- `rasterio`
 
 ## Setup
 Deploy the sqlite database:
