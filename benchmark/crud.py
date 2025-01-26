@@ -8,6 +8,11 @@ class WorkerState:
     start_time: datetime
     end_time: datetime
     n_requests: int
+    n_failures: int
+
+    @property
+    def n_successes(self) -> int:
+        return self.n_requests - self.n_failures
 
 
 def insert_row(
