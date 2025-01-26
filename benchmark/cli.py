@@ -38,7 +38,10 @@ def app():
 @app.command
 @click.argument("library_name")
 @click.argument("test_name")
-def run_test(library_name: str, test_name: str):
+@click.option(
+    "--debug", is_flag=True, show_default=True, default=False, help="Debug mode"
+)
+def run_test(library_name: str, test_name: str, debug: bool = False):
     """Run a single test."""
     all_tests = collect_tests()
 
@@ -68,14 +71,20 @@ def run_test(library_name: str, test_name: str):
     )
 
     # Run the docker-compose stack
+    command = ["docker", "compose", "up"]
+    if not debug:
+        command.append("-d")
     container_env = os.environ.copy() | {"IMAGE_TAG": image_tag}
-    subprocess.run(["docker", "compose", "up"], env=container_env)
+    subprocess.run(command, env=container_env)
 
 
 @app.command
 @click.option("--library-name")
 @click.option("--test-name")
-def run_all(library_name: str, test_name: str):
+@click.option(
+    "--debug", is_flag=True, show_default=True, default=False, help="Debug mode"
+)
+def run_all(library_name: str, test_name: str, debug: bool = False):
     """Run all available tests."""
     docker_client = docker.from_env()
 
@@ -84,7 +93,7 @@ def run_all(library_name: str, test_name: str):
     for library_name, tests in all_tests.items():
         for test_name in tests:
             click.echo(f"Running test {library_name}.{test_name}")
-            run_test([library_name, test_name], standalone_mode=False)
+            run_test([library_name, test_name, debug], standalone_mode=False)
 
             block_until_container_exits(docker_client)
 
