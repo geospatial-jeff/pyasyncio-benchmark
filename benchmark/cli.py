@@ -35,15 +35,7 @@ def app():
     pass
 
 
-@app.command
-@click.argument("library_name")
-@click.argument("test_name")
-@click.option("--replicas", type=int, default=1)
-@click.option(
-    "--debug", is_flag=True, show_default=True, default=False, help="Debug mode"
-)
-def run_test(library_name: str, test_name: str, replicas: int = 1, debug: bool = False):
-    """Run a single test."""
+def _run_test(library_name: str, test_name: str, replicas: int, debug: bool):
     all_tests = collect_tests()
 
     # Validations
@@ -83,6 +75,18 @@ def run_test(library_name: str, test_name: str, replicas: int = 1, debug: bool =
 
 
 @app.command
+@click.argument("library_name")
+@click.argument("test_name")
+@click.option("--replicas", type=int, default=1)
+@click.option(
+    "--debug", is_flag=True, show_default=True, default=False, help="Debug mode"
+)
+def run_test(library_name: str, test_name: str, replicas: int = 1, debug: bool = False):
+    """Run a single test."""
+    _run_test(library_name, test_name, replicas, debug)
+
+
+@app.command
 @click.option("--library-name")
 @click.option("--test-name")
 @click.option("--replicas", type=int, default=1)
@@ -98,7 +102,7 @@ def run_all(library_name: str, test_name: str, replicas: int = 1, debug: bool = 
     for library_name, tests in all_tests.items():
         for test_name in tests:
             click.echo(f"Running test {library_name}.{test_name}")
-            run_test([library_name, test_name, replicas, debug], standalone_mode=False)
+            _run_test(library_name, test_name, replicas, debug)
 
             block_until_container_exits(docker_client)
 
