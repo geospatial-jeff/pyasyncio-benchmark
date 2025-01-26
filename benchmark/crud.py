@@ -24,7 +24,7 @@ def insert_row(
     state: WorkerState,
 ) -> None:
     # Track state about each worker
-    sql = "INSERT INTO workers VALUES (?,?,?,?,?,?,?)"
+    sql = "INSERT INTO workers VALUES (?,?,?,?,?,?,?,?,?)"
     cur = conn.cursor()
     cur.execute(
         sql,
