@@ -34,7 +34,6 @@ async def run():
     end_time = datetime.utcnow()
 
     n_failures = len([result for result in results if isinstance(result, Exception)])
-    breakpoint()
     return WorkerState(start_time, end_time, n_requests, n_failures)
 
 
