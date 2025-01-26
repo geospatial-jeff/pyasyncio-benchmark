@@ -32,10 +32,11 @@ async def run():
     futures = (fut(store) for _ in range(n_requests))
 
     start_time = datetime.utcnow()
-    await scheduling.gather(futures)
+    results = await scheduling.gather(futures)
     end_time = datetime.utcnow()
 
-    return WorkerState(start_time, end_time, n_requests)
+    n_failures = len([result for result in results if isinstance(result, Exception)])
+    return WorkerState(start_time, end_time, n_requests, n_failures)
 
 
 def main():
