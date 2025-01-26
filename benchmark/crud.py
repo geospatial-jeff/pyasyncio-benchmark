@@ -34,6 +34,8 @@ def insert_row(
             state.start_time,
             state.end_time,
             state.n_requests,
+            state.n_failures,
+            state.n_successes,
             container_id,
             run_id,
         ),
