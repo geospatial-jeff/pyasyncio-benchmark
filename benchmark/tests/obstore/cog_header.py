@@ -19,7 +19,7 @@ async def fut(store: obs.store.S3Store):
     Semaphore allows this function to be called 500 times concurrently
     """
     r = await obs.get_range_async(store, key, start=0, end=16384)
-    r.as_bytes()
+    r.to_bytes()
 
 
 async def run():
@@ -34,6 +34,7 @@ async def run():
     end_time = datetime.utcnow()
 
     n_failures = len([result for result in results if isinstance(result, Exception)])
+    breakpoint()
     return WorkerState(start_time, end_time, n_requests, n_failures)
 
 
