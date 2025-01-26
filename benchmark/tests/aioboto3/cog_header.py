@@ -38,10 +38,11 @@ async def run():
         # Memory usage is O(10000).
         # Requests are executed 500 at a time (because of the semaphore).
         start_time = datetime.utcnow()
-        await scheduling.gather(futures)
+        results = await scheduling.gather(futures)
         end_time = datetime.utcnow()
 
-    return WorkerState(start_time, end_time, n_requests)
+    n_failures = len([result for result in results if isinstance(result, Exception)])
+    return WorkerState(start_time, end_time, n_requests, n_failures)
 
 
 def main():

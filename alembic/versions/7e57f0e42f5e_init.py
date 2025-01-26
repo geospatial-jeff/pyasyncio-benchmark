@@ -27,6 +27,8 @@ def upgrade() -> None:
         sa.Column("start_time", sa.DATETIME, nullable=False),
         sa.Column("end_time", sa.DATETIME, nullable=False),
         sa.Column("number_requests", sa.INTEGER, nullable=False),
+        sa.Column("number_failures", sa.INTEGER, nullable=False),
+        sa.Column("number_successes", sa.INTEGER, nullable=False),
         sa.Column("container_id", sa.VARCHAR, nullable=False),
         sa.Column("run_id", sa.VARCHAR, nullable=False),
     )

@@ -6,7 +6,7 @@ from typing import Any, Iterable, Coroutine, Generator
 
 async def gather(futs: Iterable[Coroutine]):
     """Run all coroutines, blocking until they all finish."""
-    return await asyncio.gather(*futs)
+    return await asyncio.gather(*futs, return_exceptions=True)
 
 
 async def as_completed(futs: Iterable[Coroutine]) -> Generator[Any, None, None]:
