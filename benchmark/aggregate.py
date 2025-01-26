@@ -80,6 +80,17 @@ def summarize_test_results():
             .to_dict()
         )
 
+        # Memory
+        memory_query = f'sum by (id) (rate(container_memory_usage_bytes{{id="{container_id}"}}[15s]))'
+        resp = evaluate_metric(memory_query, start_time, end_time)
+        memory_usage_metrics = (
+            resp["metric_value"]
+            .describe()
+            .add_prefix("memory_usage_bytes_")
+            .transpose()
+            .to_dict()
+        )
+
         # Network throughput per cpu
         resp = evaluate_metric(
             f"{recv_query} / {cpu_seconds_query}", start_time, end_time
@@ -100,6 +111,7 @@ def summarize_test_results():
             **throughput_metrics,
             **cpu_metrics,
             **network_per_cpu_metrics,
+            **memory_usage_metrics,
             "duration_seconds": duration_seconds,
             "requests_per_second": requests_per_second,
         }
