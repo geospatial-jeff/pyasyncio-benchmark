@@ -18,11 +18,12 @@ requests_unixsocket2 = "^0.4.2"
 pydantic-settings = "^2.7.0"
 click = "^8.1.8"
 docker = "^7.1.0"
-pandas = "==2.1.4"
+pandas = "^2.2.3"
 requests = "^2.32.3"
 s3fs = "==2024.12.0"
 httpx = "^0.28.1"
 rasterio = "^1.4.3"
+numpy = "^2.0.0"
 
 
 [tool.poetry.group.dev.dependencies]
