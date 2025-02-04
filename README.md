@@ -9,9 +9,17 @@ Benchmark I/O libraries for geospatial use cases.  Currently testing:
 - `rasterio`
 
 ## Setup
-Deploy the sqlite database:
+
+Install dependencies
+
 ```shell
-db_url=sqlite:///sqlite.db alembic upgrade head
+poetry install
+```
+
+Deploy the sqlite database:
+
+```shell
+db_url=sqlite:///sqlite.db poetry run alembic upgrade head
 ```
 
 Run the monitoring stack:
@@ -30,7 +38,7 @@ Tests are run through a CLI available through the poetry environment.  First
 run `poetry install`, then call the CLI.
 
 ```shell
-➜  benchmark --help
+➜  poetry run benchmark --help
 Usage: benchmark [OPTIONS] COMMAND [ARGS]...
 
 Options:
@@ -68,24 +76,24 @@ looks like:
 poetry install
 
 # Run all tests.  Blocks until all tests complete.
-benchmark run-all
+poetry run benchmark run-all
 
 # Save test results to CSV.
-benchmark get-results test_results.csv
+poetry run benchmark get-results test_results.csv
 ```
 
 This command returns ALL test results in the database.  You may start a fresh by recreating the
 SQLite database.
 ```shell
 rm sqlite.db
-db_url=sqlite:///sqlite.db alembic upgrade head
+db_url=sqlite:///sqlite.db poetry run alembic upgrade head
 ```
 
 
 ## Live Monitoring
 
 Prometheus (`localhost:9090`) provides a live view into container metrics as tests run.  It is often helpful to have
-the prometheus dashboard up in a separate window as tests run.  Prometheus uses a functional query language called PromQL, 
+the prometheus dashboard up in a separate window as tests run.  Prometheus uses a functional query language called PromQL,
 below are a few useful prometheus queries to look at while running tests, simply:
 1. Go to `localhost:9090`.
 2. Switch to `Graph` view (defaults to `Table`).
