@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 import requests
 import pandas as pd
 
@@ -47,7 +47,7 @@ def fetch_test_runs() -> list[sqlite3.Row]:
     return rows
 
 
-def summarize_test_results():
+def summarize_test_results(sampling_interval_seconds: int):
     """Summarize metrics across all test runs."""
     test_runs = fetch_test_runs()
 
@@ -58,8 +58,11 @@ def summarize_test_results():
         start_time = datetime.strptime(run["start_time"], "%Y-%m-%d %H:%M:%S.%f")
         end_time = datetime.strptime(run["end_time"], "%Y-%m-%d %H:%M:%S.%f")
 
+        # Buffer `start_time` by prometheus sampling interval
+        start_time = start_time + timedelta(seconds=sampling_interval_seconds)
+
         # Network throughput
-        recv_query = f'sum by (id) (rate(container_network_receive_bytes_total{{id="{container_id}"}}[15s]))'
+        recv_query = f'sum by (id) (rate(container_network_receive_bytes_total{{id="{container_id}"}}[{sampling_interval_seconds}s]))'
         resp = evaluate_metric(recv_query, start_time, end_time)
         throughput_metrics = (
             resp["metric_value"]
@@ -70,7 +73,7 @@ def summarize_test_results():
         )
 
         # CPU utilization
-        cpu_seconds_query = f'sum by (id) (rate(container_cpu_user_seconds_total{{id="{container_id}"}}[15s]))'
+        cpu_seconds_query = f'sum by (id) (rate(container_cpu_user_seconds_total{{id="{container_id}"}}[{sampling_interval_seconds}s]))'
         resp = evaluate_metric(cpu_seconds_query, start_time, end_time)
         cpu_metrics = (
             resp["metric_value"]
@@ -81,7 +84,7 @@ def summarize_test_results():
         )
 
         # Memory
-        memory_query = f'sum by (id) (rate(container_memory_usage_bytes{{id="{container_id}"}}[15s]))'
+        memory_query = f'sum by (id) (rate(container_memory_usage_bytes{{id="{container_id}"}}[{sampling_interval_seconds}s]))'
         resp = evaluate_metric(memory_query, start_time, end_time)
         memory_usage_metrics = (
             resp["metric_value"]
