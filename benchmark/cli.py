@@ -109,9 +109,15 @@ def run_all(library_name: str, test_name: str, replicas: int = 1, debug: bool = 
 
 @app.command
 @click.argument("filepath")
-def get_results(filepath: str):
+@click.option(
+    "--sampling-interval",
+    type=int,
+    default=5,
+    help="Prometheus sampling window in seconds, should be smaller than the longest running test.",
+)
+def get_results(filepath: str, sampling_interval: int = 5):
     """Save test results to CSV file."""
-    summarize_test_results().to_csv(filepath, header=True, index=False)
+    summarize_test_results(sampling_interval).to_csv(filepath, header=True, index=False)
 
 
 @app.command
