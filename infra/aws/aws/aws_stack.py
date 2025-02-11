@@ -39,10 +39,10 @@ class CdkEc2Stack(Stack):
             ec2.Peer.any_ipv4(), ec2.Port.tcp(22), "allow SSH access"
         )
         sec_group.add_ingress_rule(
-            ec2.Peer.any_piv4(), ec2.Port.tcp(9090), "expose prometheus"
+            ec2.Peer.any_ipv4(), ec2.Port.tcp(9090), "expose prometheus"
         )
         sec_group.add_ingress_rule(
-            ec2.Peer.any_piv4(), ec2.Port.tcp(8080), "expose cAdvisor"
+            ec2.Peer.any_ipv4(), ec2.Port.tcp(8080), "expose cAdvisor"
         )
 
         # Create Key Pair
