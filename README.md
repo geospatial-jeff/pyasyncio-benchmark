@@ -105,3 +105,8 @@ rate(container_network_receive_bytes_total{}[15s])
 ```
 
 A full list of prometheus metrics available through cAdvisor are available [here](https://github.com/google/cadvisor/blob/master/docs/storage/prometheus.md).
+
+
+## Deployment
+
+The [infra](./infra/README.md) contains an EC2 instance deployment with AWS CDK.
