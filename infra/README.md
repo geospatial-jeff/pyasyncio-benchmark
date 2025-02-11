@@ -24,7 +24,7 @@ You can now SSH into the instance:
 
 ```shell
 ssh -i "mykey.pem" ubuntu@<public_hostname>
-
+```
 
 ## Instance Setup
 Next we must get the benchmark running on the instance.  First install several system dependencies:
