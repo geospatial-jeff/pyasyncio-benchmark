@@ -23,7 +23,7 @@ chmod 400 mykey.pem
 You can now SSH into the instance:
 
 ```shell
-ssh -i "benchmarkrunner.pem" ubuntu@<public_hostname>
+ssh -i "mykey.pem" ubuntu@<public_hostname>
 
 
 ## Instance Setup
@@ -53,7 +53,7 @@ docker compose -f docker-compose.monitoring.yml up
 The CDK stack contains a Security Group which exposes Prometheus and cAdvisor on ports 8080: and 9090:, respectively.  These ports may be forwarded via SSH tunnel as follows:
 
 ```shell
-ssh -i "benchmarkrunner.pem" -N -L 9090:localhost:9090 ubuntu@ec2-52-53-162-116.us-west-1.compute.amazonaws.com
+ssh -i "mykey.pem" -N -L 9090:localhost:9090 ubuntu@ec2-52-53-162-116.us-west-1.compute.amazonaws.com
 ```
 
 ## Useful commands
