@@ -61,7 +61,9 @@ class CdkEc2Stack(Stack):
             self,
             "BenchmarkRunner",
             instance_type=ec2.InstanceType("t2.micro"),
-            machine_image=ec2.MachineImage.latest_amazon_linux2023(),
+            machine_image=ec2.MachineImage.generic_linux(
+                {"us-west-1": "ami-0d413c682033e11fd"}
+            ),
             vpc=vpc,
             security_group=sec_group,
             associate_public_ip_address=True,
