@@ -164,5 +164,5 @@ sqlite.db
 
 # AWS cdk
 # CDK asset staging directory
-infra/aws/.cdk.staging
-infra/aws/cdk.out
+infra/.cdk.staging
+infra/cdk.out
