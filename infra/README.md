@@ -35,7 +35,7 @@ sudo apt-get install docker.io docker-compose-v2 -y
 ```
 
 Next we must create a new user group with access to the underlying Unix socket used by Docker, which prevents
-us from prefexing every docker command with sudo.
+us from prefixing every docker command with sudo.
 
 ```shell
 sudo groupadd docker
