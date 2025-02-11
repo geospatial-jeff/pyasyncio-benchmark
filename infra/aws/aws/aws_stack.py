@@ -38,6 +38,12 @@ class CdkEc2Stack(Stack):
         sec_group.add_ingress_rule(
             ec2.Peer.any_ipv4(), ec2.Port.tcp(22), "allow SSH access"
         )
+        sec_group.add_ingress_rule(
+            ec2.Peer.any_piv4(), ec2.Port.tcp(9090), "expose prometheus"
+        )
+        sec_group.add_ingress_rule(
+            ec2.Peer.any_piv4(), ec2.Port.tcp(8080), "expose cAdvisor"
+        )
 
         # Create Key Pair
         # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_ec2/CfnKeyPair.html
