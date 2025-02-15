@@ -52,20 +52,22 @@ def create_requests_session(config: HttpClientConfig) -> requests.Session:
     return session
 
 
-def create_aioboto3_s3_client(config: HttpClientConfig, **kwargs):
+def create_aioboto3_s3_client(config: HttpClientConfig, region_name: str, **kwargs):
     session = aioboto3.Session()
     botocore_config = botocore.config.Config(
         max_pool_connections=config.pool_size_per_host,
         tcp_keepalive=config.keep_alive,
+        region_name=region_name,
         **kwargs,
     )
     return session.client("s3", config=botocore_config)
 
 
-def create_fsspec_s3(config: HttpClientConfig, **kwargs):
+def create_fsspec_s3(config: HttpClientConfig, region_name: str, **kwargs):
     botocore_config = {
         "max_pool_connections": config.pool_size_per_host,
         "tcp_keepalive": config.keep_alive,
+        "region_name": region_name,
         **kwargs,
     }
     return s3fs.S3FileSystem(asynchronous=True, config_kwargs=botocore_config, **kwargs)
