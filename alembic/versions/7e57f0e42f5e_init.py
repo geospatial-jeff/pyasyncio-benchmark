@@ -31,6 +31,10 @@ def upgrade() -> None:
         sa.Column("number_successes", sa.INTEGER, nullable=False),
         sa.Column("container_id", sa.VARCHAR, nullable=False),
         sa.Column("run_id", sa.VARCHAR, nullable=False),
+        sa.Column("pool_size", sa.INTEGER, nullable=False),
+        sa.Column("keep_alive", sa.BOOLEAN, nullable=False),
+        sa.Column("keep_alive_timeout_seconds", sa.VARCHAR, nullable=False),
+        sa.Column("use_dns_cache", sa.BOOLEAN, nullable=False),
     )
 
 

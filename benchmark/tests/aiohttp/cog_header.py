@@ -6,6 +6,7 @@ import aiohttp
 from benchmark import scheduling
 from benchmark.crud import WorkerState
 from benchmark.synchronization import semaphore
+from benchmark.clients import HttpClientConfig, create_aiohttp_client
 
 
 key = "sentinel-s2-l2a-cogs/50/C/MA/2021/1/S2A_50CMA_20210121_0_L2A/B08.tif"
@@ -25,9 +26,9 @@ async def fut(session: aiohttp.ClientSession):
     await r.read()
 
 
-async def run():
+async def run(config: HttpClientConfig):
     n_requests = 10000
-    async with aiohttp.ClientSession() as session:
+    async with create_aiohttp_client(config) as session:
         futures = (fut(session) for _ in range(n_requests))
 
         # Schedule them using a gather.
@@ -39,10 +40,10 @@ async def run():
     return WorkerState(start_time, end_time, n_requests, n_failures)
 
 
-def main():
+def main(config: HttpClientConfig):
     # Run the script.
-    return asyncio.run(run())
+    return asyncio.run(run(config))
 
 
 if __name__ == "__main__":
-    main()
+    main(HttpClientConfig())
