@@ -7,7 +7,6 @@ services:
       replicas: ${REPLICA_COUNT?error}
     environment:
       DB_FILEPATH: "/var/data/sqlite.db"
-      RUN_ID: ${RUN_ID:-1}
     volumes:
       - ${PWD}/sqlite.db:/var/data/sqlite.db
       - /var/run/docker.sock:/var/run/docker.sock

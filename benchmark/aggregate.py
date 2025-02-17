@@ -47,8 +47,8 @@ def fetch_test_runs() -> list[sqlite3.Row]:
     return rows
 
 
-def summarize_test_results(sampling_interval_seconds: int):
-    """Summarize metrics across all test runs."""
+def summarize_test_results_workers(sampling_interval_seconds: int):
+    """Summarize metrics for individual workers across all test runs."""
     test_runs = fetch_test_runs()
 
     results = []
@@ -59,11 +59,11 @@ def summarize_test_results(sampling_interval_seconds: int):
         end_time = datetime.strptime(run["end_time"], "%Y-%m-%d %H:%M:%S.%f")
 
         # Buffer `start_time` by prometheus sampling interval
-        start_time = start_time + timedelta(seconds=sampling_interval_seconds)
+        promql_start_time = start_time + timedelta(seconds=sampling_interval_seconds)
 
         # Network throughput
         recv_query = f'sum by (id) (rate(container_network_receive_bytes_total{{id="{container_id}"}}[{sampling_interval_seconds}s]))'
-        resp = evaluate_metric(recv_query, start_time, end_time)
+        resp = evaluate_metric(recv_query, promql_start_time, end_time)
         throughput_metrics = (
             resp["metric_value"]
             .describe()
@@ -74,7 +74,7 @@ def summarize_test_results(sampling_interval_seconds: int):
 
         # CPU utilization
         cpu_seconds_query = f'sum by (id) (rate(container_cpu_user_seconds_total{{id="{container_id}"}}[{sampling_interval_seconds}s]))'
-        resp = evaluate_metric(cpu_seconds_query, start_time, end_time)
+        resp = evaluate_metric(cpu_seconds_query, promql_start_time, end_time)
         cpu_metrics = (
             resp["metric_value"]
             .describe()
@@ -85,7 +85,7 @@ def summarize_test_results(sampling_interval_seconds: int):
 
         # Memory
         memory_query = f'sum by (id) (rate(container_memory_usage_bytes{{id="{container_id}"}}[{sampling_interval_seconds}s]))'
-        resp = evaluate_metric(memory_query, start_time, end_time)
+        resp = evaluate_metric(memory_query, promql_start_time, end_time)
         memory_usage_metrics = (
             resp["metric_value"]
             .describe()
@@ -96,7 +96,7 @@ def summarize_test_results(sampling_interval_seconds: int):
 
         # Network throughput per cpu
         resp = evaluate_metric(
-            f"{recv_query} / {cpu_seconds_query}", start_time, end_time
+            f"{recv_query} / {cpu_seconds_query}", promql_start_time, end_time
         )
         network_per_cpu_metrics = (
             resp["metric_value"]
@@ -121,6 +121,94 @@ def summarize_test_results(sampling_interval_seconds: int):
 
         results.append(all_metrics)
 
-    # TODO: Add top level "run-id"
-    # Group results across run-ids
+    return pd.DataFrame.from_records(results)
+
+
+def summarize_test_results_deployment(sampling_interval_seconds: int) -> pd.DataFrame:
+    """Summarize metrics for individual deployments (multiple workers) across all test runs."""
+    test_runs = fetch_test_runs()
+    df = pd.DataFrame.from_records([dict(run) for run in test_runs])
+    df["start_time"] = pd.to_datetime(df["start_time"])
+    df["end_time"] = pd.to_datetime(df["end_time"])
+    grouped = df.groupby("run_id")
+
+    results = []
+    for run_id, group in grouped:
+        start_time = group["start_time"].min()
+        end_time = group["end_time"].max()
+
+        # Buffer `start_time` by prometheus sampling interval
+        promql_start_time = start_time + timedelta(seconds=sampling_interval_seconds)
+
+        # Network throughput
+        recv_query = f'sum by (container_label_RUN_ID) (rate(container_network_receive_bytes_total{{container_label_RUN_ID="{run_id}"}}[{sampling_interval_seconds}s]))'
+        resp = evaluate_metric(recv_query, promql_start_time, end_time)
+        throughput_metrics = (
+            resp["metric_value"]
+            .describe()
+            .add_prefix("recv_bytes_per_second_")
+            .transpose()
+            .to_dict()
+        )
+
+        # CPU utilization
+        cpu_seconds_query = f'sum by (container_label_RUN_ID) (rate(container_cpu_user_seconds_total{{container_label_RUN_ID="{run_id}"}}[{sampling_interval_seconds}s]))'
+        resp = evaluate_metric(cpu_seconds_query, promql_start_time, end_time)
+        cpu_metrics = (
+            resp["metric_value"]
+            .describe()
+            .add_prefix("cpu_seconds_")
+            .transpose()
+            .to_dict()
+        )
+
+        # Memory
+        memory_query = f'sum by (container_label_RUN_ID) (rate(container_memory_usage_bytes{{container_label_RUN_ID="{run_id}"}}[{sampling_interval_seconds}s]))'
+        resp = evaluate_metric(memory_query, promql_start_time, end_time)
+        memory_usage_metrics = (
+            resp["metric_value"]
+            .describe()
+            .add_prefix("memory_usage_bytes_")
+            .transpose()
+            .to_dict()
+        )
+
+        # Network throughput per cpu
+        resp = evaluate_metric(
+            f"{recv_query} / {cpu_seconds_query}", promql_start_time, end_time
+        )
+        network_per_cpu_metrics = (
+            resp["metric_value"]
+            .describe()
+            .add_prefix("recv_bytes_per_second_per_cpu_")
+            .transpose()
+            .to_dict()
+        )
+
+        duration_seconds = (end_time - start_time).total_seconds()
+        num_requests = int(group["number_requests"].sum())
+        requests_per_second = num_requests / duration_seconds
+
+        group.drop(["container_id"], axis=1, inplace=True)
+        all_metrics = {
+            "library_name": group.iloc[0].library_name,
+            "test_name": group.iloc[0].test_name,
+            "start_time": start_time.strftime("%Y-%m-%d %H:%M:%S.%f"),
+            "end_time": end_time.strftime("%Y-%m-%d %H:%M:%S.%f"),
+            "number_requests": num_requests,
+            "number_failures": int(group["number_failures"].sum()),
+            "run_id": run_id,
+            "pool_size": int(group.iloc[0].pool_size),
+            "keep_alive": bool(group.iloc[0].keep_alive),
+            "keep_alive_timeout_seconds": int(group.iloc[0].keep_alive_timeout_seconds),
+            "use_dns_cache": bool(group.iloc[0].use_dns_cache),
+            **throughput_metrics,
+            **cpu_metrics,
+            **network_per_cpu_metrics,
+            **memory_usage_metrics,
+            "duration_seconds": duration_seconds,
+            "requests_per_second": requests_per_second,
+        }
+        results.append(all_metrics)
+
     return pd.DataFrame.from_records(results)
