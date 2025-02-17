@@ -3,12 +3,16 @@ from collections import defaultdict
 import functools
 import click
 import subprocess
+import uuid
 
 import docker
 
 from benchmark import main
 from benchmark.docker_utils import block_until_container_exits
-from benchmark.aggregate import summarize_test_results
+from benchmark.aggregate import (
+    summarize_test_results_workers,
+    summarize_test_results_deployment,
+)
 from benchmark.clients import (
     HttpClientConfig,
     DEFAULT_USE_DNS_CACHE,
@@ -85,6 +89,8 @@ def _run_test(
             f"KEEP_ALIVE_TIMEOUT={keep_alive_timeout}",
             "--build-arg",
             f"USE_DNS_CACHE={use_dns_cache}",
+            "--build-arg",
+            f"RUN_ID={str(uuid.uuid4())}",
         ]
     )
 
@@ -185,25 +191,34 @@ def run_all(
 
 
 @app.command
-@click.argument("filepath")
+@click.argument(
+    "folder_path", type=click.Path(exists=True, file_okay=False, readable=True)
+)
 @click.option(
     "--sampling-interval",
     type=int,
     default=5,
     help="Prometheus sampling window in seconds, should be smaller than the longest running test.",
 )
-def get_results(filepath: str, sampling_interval: int = 5):
+def get_results(folder_path: str, sampling_interval: int = 5):
     """Save test results to CSV file."""
-    summarize_test_results(sampling_interval).to_csv(filepath, header=True, index=False)
+    summarize_test_results_workers(sampling_interval).to_csv(
+        os.path.join(folder_path, "container_results.csv"), header=True, index=False
+    )
+    summarize_test_results_deployment(sampling_interval).to_csv(
+        os.path.join(folder_path, "worker_results.csv"), header=True, index=False
+    )
 
 
 @app.command
 @click.argument("library_name")
 @click.argument("test_name")
+@click.argument("run_id")
 @client_options
 def docker_entrypoint(
     library_name: str,
     test_name: str,
+    run_id: str,
     pool_size: int = DEFAULT_POOL_SIZE_PER_HOST,
     keep_alive: bool = DEFAULT_KEEP_ALIVE,
     keep_alive_timeout: int = DEFAULT_KEEP_ALIVE_TIMEOUT_SECONDS,
@@ -216,4 +231,4 @@ def docker_entrypoint(
         keep_alive_timeout_seconds=keep_alive_timeout,
         use_dns_cache=use_dns_cache,
     )
-    main.run_test(library_name, test_name, client_config)
+    main.run_test(library_name, test_name, run_id, client_config)
