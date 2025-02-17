@@ -9,6 +9,7 @@ import requests.adapters
 from benchmark import scheduling
 from benchmark.crud import WorkerState
 from benchmark.synchronization import semaphore
+from benchmark.clients import HttpClientConfig, create_requests_session
 
 
 key = "sentinel-s2-l2a-cogs/50/C/MA/2021/1/S2A_50CMA_20210121_0_L2A/B08.tif"
@@ -37,13 +38,9 @@ async def fut(session: requests.Session):
     await run_in_threadpool(session)
 
 
-async def run():
+async def run(config: HttpClientConfig):
     n_requests = 10000
-
-    # Crete connection pool
-    session = requests.Session()
-    adapter = requests.adapters.HTTPAdapter()
-    session.mount("https://", adapter)
+    session = create_requests_session(config)
 
     start_time = datetime.utcnow()
     futures = (fut(session) for _ in range(n_requests))
@@ -54,10 +51,10 @@ async def run():
     return WorkerState(start_time, end_time, n_requests, n_failures)
 
 
-def main():
+def main(config: HttpClientConfig):
     # Run the script.
-    return asyncio.run(run())
+    return asyncio.run(run(config))
 
 
 if __name__ == "__main__":
-    main()
+    main(HttpClientConfig())

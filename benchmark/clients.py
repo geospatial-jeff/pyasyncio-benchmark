@@ -1,3 +1,4 @@
+import asyncio
 from dataclasses import dataclass
 import aioboto3
 import aiohttp
@@ -8,6 +9,12 @@ import s3fs
 import obstore as obs
 
 
+DEFAULT_POOL_SIZE_PER_HOST: int = 100
+DEFAULT_KEEP_ALIVE: bool = True
+DEFAULT_KEEP_ALIVE_TIMEOUT_SECONDS: int = 30
+DEFAULT_USE_DNS_CACHE: bool = True
+
+
 @dataclass
 class HttpClientConfig:
     """HTTP client configuration.
@@ -15,10 +22,10 @@ class HttpClientConfig:
     We assume that tests are only sending requests to a single host (bucket).
     """
 
-    pool_size_per_host: int = 50
-    keep_alive: bool = True
-    keep_alive_timeout_seconds: int = 30
-    use_dns_cache: bool = True
+    pool_size_per_host: int = DEFAULT_POOL_SIZE_PER_HOST
+    keep_alive: bool = DEFAULT_KEEP_ALIVE
+    keep_alive_timeout_seconds: int = DEFAULT_KEEP_ALIVE_TIMEOUT_SECONDS
+    use_dns_cache: bool = DEFAULT_USE_DNS_CACHE
 
 
 def create_httpx_client(config: HttpClientConfig, **kwargs) -> httpx.Client:
@@ -31,14 +38,14 @@ def create_httpx_client(config: HttpClientConfig, **kwargs) -> httpx.Client:
 
 
 def create_aiohttp_client(config: HttpClientConfig, **kwargs) -> aiohttp.ClientSession:
-    transport = aiohttp.TCPConnector(
-        force_close=config.keep_alive,
+    connector = aiohttp.TCPConnector(
+        force_close=not config.keep_alive,
         limit=config.pool_size_per_host,
         limit_per_host=config.pool_size_per_host,
         keepalive_timeout=config.keep_alive_timeout_seconds,
         use_dns_cache=config.use_dns_cache,
     )
-    return aiohttp.ClientSession(transport=transport, **kwargs)
+    return aiohttp.ClientSession(connector=connector, **kwargs)
 
 
 def create_requests_session(config: HttpClientConfig) -> requests.Session:
@@ -70,17 +77,23 @@ def create_fsspec_s3(config: HttpClientConfig, region_name: str, **kwargs):
         "region_name": region_name,
         **kwargs,
     }
-    return s3fs.S3FileSystem(asynchronous=True, config_kwargs=botocore_config, **kwargs)
+    return s3fs.S3FileSystem(
+        asynchronous=True,
+        loop=asyncio.get_running_loop(),
+        config_kwargs=botocore_config,
+        **kwargs,
+    )
 
 
 def create_obstore_store(
-    config: HttpClientConfig, bucket: str, **kwargs
+    config: HttpClientConfig, bucket: str, region_name: str, **kwargs
 ) -> obs.store.S3Store:
     return obs.store.S3Store(
         bucket,
-        config=obs.store.ClientConfig(
-            pool_max_idle_per_host=config.pool_size_per_host,
-            http2_keep_alive_timeout=config.keep_alive_timeout_seconds,
+        config={"aws_default_region": region_name, "aws_skip_signature": True},
+        client_options={
+            "pool_max_idle_per_host": str(config.pool_size_per_host),
+            "http2_keep_alive_timeout": str(config.keep_alive_timeout_seconds) + "s",
             **kwargs,
-        ),
+        },
     )

@@ -6,7 +6,7 @@ import s3fs
 from benchmark import scheduling
 from benchmark.crud import WorkerState
 from benchmark.synchronization import semaphore
-
+from benchmark.clients import HttpClientConfig, create_fsspec_s3
 
 key = "sentinel-s2-l2a-cogs/50/C/MA/2021/1/S2A_50CMA_20210121_0_L2A/B08.tif"
 
@@ -20,11 +20,9 @@ async def fut(filesystem: s3fs.S3FileSystem):
     await filesystem._cat_file(f"sentinel-cogs/{key}", start=0, end=16384)
 
 
-async def run():
+async def run(config: HttpClientConfig):
     n_requests = 10000
-    filesystem = s3fs.S3FileSystem(
-        anon=True, asynchronous=True, loop=asyncio.get_running_loop()
-    )
+    filesystem = create_fsspec_s3(config, "us-west-2")
 
     futures = (fut(filesystem) for _ in range(n_requests))
 
@@ -37,10 +35,10 @@ async def run():
     return WorkerState(start_time, end_time, n_requests, n_failures)
 
 
-def main():
+def main(config: HttpClientConfig):
     # Run the script.
-    return asyncio.run(run())
+    return asyncio.run(run(config))
 
 
 if __name__ == "__main__":
-    main()
+    main(HttpClientConfig())

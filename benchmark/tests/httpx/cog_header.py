@@ -6,6 +6,7 @@ import httpx
 from benchmark import scheduling
 from benchmark.crud import WorkerState
 from benchmark.synchronization import semaphore
+from benchmark.clients import HttpClientConfig, create_httpx_client
 
 
 key = "sentinel-s2-l2a-cogs/50/C/MA/2021/1/S2A_50CMA_20210121_0_L2A/B08.tif"
@@ -23,16 +24,11 @@ async def fut(client: httpx.AsyncClient):
     r.read()
 
 
-async def run():
+async def run(config: HttpClientConfig):
     n_requests = 10000
 
-    # httpx throws `PoolTimeout` if number of concurrent
-    # coroutines exceeds `max_connections`.  httpx in general
-    # seems to struggle with handling lots of connections.
-    limits = httpx.Limits(max_connections=500)
-
-    async with httpx.AsyncClient(
-        base_url="https://sentinel-cogs.s3.amazonaws.com", limits=limits
+    async with create_httpx_client(
+        config, base_url="https://sentinel-cogs.s3.amazonaws.com"
     ) as client:
         futures = (fut(client) for _ in range(n_requests))
 
@@ -45,10 +41,10 @@ async def run():
     return WorkerState(start_time, end_time, n_requests, n_failures)
 
 
-def main():
+def main(config: HttpClientConfig):
     # Run the script.
-    return asyncio.run(run())
+    return asyncio.run(run(config))
 
 
 if __name__ == "__main__":
-    main()
+    main(HttpClientConfig())

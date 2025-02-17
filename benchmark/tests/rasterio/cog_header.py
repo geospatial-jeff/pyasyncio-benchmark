@@ -35,6 +35,7 @@ async def run():
         GDAL_INGESTED_BYTES_AT_OPEN=16384,
         GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR",
         AWS_NO_SIGN_REQUEST="YES",
+        AWS_REGION="us-west-2",
         CPL_VSIL_CURL_NON_CACHED=f"/vsis3/sentinel-cogs/{key}",
     ):
         start_time = datetime.utcnow()

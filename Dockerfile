@@ -8,17 +8,26 @@ WORKDIR app
 
 COPY pyproject.toml pyproject.toml
 COPY poetry.lock poetry.lock
-COPY benchmark benchmark
 COPY README.md README.md
-RUN poetry install
+RUN poetry install --no-root
+COPY benchmark benchmark
 
 # Add labels to track container-level metrics
 ARG LIBRARY_NAME
 ARG TEST_NAME
+ARG POOL_SIZE
+ARG KEEP_ALIVE
+ARG KEEP_ALIVE_TIMEOUT
+ARG USE_DNS_CACHE
 
 LABEL TAG=${LIBRARY_NAME}_${TEST_NAME}
 
 ENV LIBRARY_NAME=${LIBRARY_NAME}
 ENV TEST_NAME=${TEST_NAME}
+ENV POOL_SIZE=${POOL_SIZE}
+ENV KEEP_ALIVE=${KEEP_ALIVE}
+ENV KEEP_ALIVE_TIMEOUT=${KEEP_ALIVE_TIMEOUT}
+ENV USE_DNS_CACHE=${USE_DNS_CACHE}
 
-CMD poetry run benchmark docker-entrypoint $LIBRARY_NAME $TEST_NAME
+
+CMD poetry run benchmark docker-entrypoint $LIBRARY_NAME $TEST_NAME --pool-size $POOL_SIZE --keep-alive $KEEP_ALIVE --keep-alive-timeout $KEEP_ALIVE_TIMEOUT --use-dns-cache $USE_DNS_CACHE
