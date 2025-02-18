@@ -30,7 +30,7 @@ ssh -i "mykey.pem" ubuntu@<public_hostname>
 Next we must get the benchmark running on the instance.  First install several system dependencies:
 
 ```shell
-sudo apt-get update && apt-get upgrade -y
+sudo apt-get update && sudo apt-get upgrade -y
 sudo apt-get install docker.io docker-compose-v2 -y
 ```
 

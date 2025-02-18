@@ -70,5 +70,16 @@ class CdkEc2Stack(Stack):
             key_name=cfn_key_pair.key_name,
         )
 
+        # Override root volume
+        instance.instance.add_property_override(
+            "BlockDeviceMappings",
+            [
+                {
+                    "DeviceName": "/dev/sda1",
+                    "Ebs": {"VolumeSize": 25},
+                }
+            ],
+        )
+
         # Output Instance ID
         CfnOutput(self, "InstanceId", value=instance.instance_id)
