@@ -22,7 +22,7 @@ def _get_instance_type() -> str:
     return metadata
 
 
-def _get_instance_price(instance_type: str):
+def _get_instance_price(instance_type: str) -> float:
     """Get hourly price (USD) of instance type in `us-east-1`."""
     client = boto3.client("pricing", region_name="us-east-1")
     data = client.get_products(
@@ -44,7 +44,7 @@ def _get_instance_price(instance_type: str):
     id1 = list(od)[0]
     id2 = list(od[id1]["priceDimensions"])[0]
     price = od[id1]["priceDimensions"][id2]["pricePerUnit"]["USD"]
-    return price
+    return float(price)
 
 
 def is_ec2() -> bool:
