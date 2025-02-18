@@ -62,7 +62,7 @@ class CdkEc2Stack(Stack):
             "BenchmarkRunner",
             instance_type=ec2.InstanceType("t2.micro"),
             machine_image=ec2.MachineImage.generic_linux(
-                {"us-west-1": "ami-0d413c682033e11fd"}
+                {"us-west-2": "ami-00c257e12d6828491"}
             ),
             vpc=vpc,
             security_group=sec_group,
