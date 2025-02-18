@@ -215,7 +215,7 @@ def get_results(folder_path: str, sampling_interval: int = 5):
         os.path.join(folder_path, "container_results.csv"), header=True, index=False
     )
     summarize_test_results_deployment(sampling_interval).to_csv(
-        os.path.join(folder_path, "worker_results.csv"), header=True, index=False
+        os.path.join(folder_path, "aggregated_results.csv"), header=True, index=False
     )
 
 
