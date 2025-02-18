@@ -23,7 +23,6 @@ def insert_row(
     test_name: str,
     container_id: str,
     run_id: str,
-    n_requests: int,
     state: WorkerState,
     client_config: HttpClientConfig,
 ) -> None:
