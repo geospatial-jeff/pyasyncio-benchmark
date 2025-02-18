@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import requests
 import pandas as pd
 
-from benchmark.billing import get_ec2_billing_info
+from benchmark.billing import get_ec2_billing_info, is_ec2
 from benchmark.settings import get_settings
 
 
@@ -54,7 +54,10 @@ def summarize_test_results_workers(sampling_interval_seconds: int):
 
     results = []
     for run in test_runs:
-        container_id = f"/docker/{run['container_id']}"
+        if is_ec2():
+            container_id = f"/system.slice/docker-{run['container_id']}.scope"
+        else:
+            container_id = f"/docker/{run['container_id']}"
         print(f"Fetching metrics for container {container_id}")
         start_time = datetime.strptime(run["start_time"], "%Y-%m-%d %H:%M:%S.%f")
         end_time = datetime.strptime(run["end_time"], "%Y-%m-%d %H:%M:%S.%f")
@@ -120,7 +123,8 @@ def summarize_test_results_workers(sampling_interval_seconds: int):
             "requests_per_second": requests_per_second,
         }
 
-        if b := get_ec2_billing_info():
+        if is_ec2():
+            b = get_ec2_billing_info()
             all_metrics["instance_type"] = b["instance_type"]
             all_metrics["cost_usd"] = (b["hourly_price"] / 3600) * duration_seconds
 
@@ -214,8 +218,8 @@ def summarize_test_results_deployment(sampling_interval_seconds: int) -> pd.Data
             "duration_seconds": duration_seconds,
             "requests_per_second": requests_per_second,
         }
-        if b := get_ec2_billing_info():
-            breakpoint()
+        if is_ec2():
+            b = get_ec2_billing_info()
             all_metrics["instance_type"] = b["instance_type"]
             all_metrics["cost_usd"] = (b["hourly_price"] / 3600) * duration_seconds
 
