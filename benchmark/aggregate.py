@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import requests
 import pandas as pd
 
+from benchmark.billing import get_ec2_billing_info
 from benchmark.settings import get_settings
 
 
@@ -119,6 +120,10 @@ def summarize_test_results_workers(sampling_interval_seconds: int):
             "requests_per_second": requests_per_second,
         }
 
+        if b := get_ec2_billing_info():
+            all_metrics["instance_type"] = b["instance_type"]
+            all_metrics["cost_usd"] = (b["hourly_price"] / 3600) * duration_seconds
+
         results.append(all_metrics)
 
     return pd.DataFrame.from_records(results)
@@ -209,6 +214,11 @@ def summarize_test_results_deployment(sampling_interval_seconds: int) -> pd.Data
             "duration_seconds": duration_seconds,
             "requests_per_second": requests_per_second,
         }
+        if b := get_ec2_billing_info():
+            breakpoint()
+            all_metrics["instance_type"] = b["instance_type"]
+            all_metrics["cost_usd"] = (b["hourly_price"] / 3600) * duration_seconds
+
         results.append(all_metrics)
 
     return pd.DataFrame.from_records(results)
