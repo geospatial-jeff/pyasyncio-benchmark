@@ -6,6 +6,7 @@ import functools
 import rasterio
 
 from benchmark import scheduling
+from benchmark.clients import HttpClientConfig
 from benchmark.crud import WorkerState
 from benchmark.synchronization import semaphore
 
@@ -28,9 +29,7 @@ async def fut():
     return await anyio.to_thread.run_sync(func)
 
 
-async def run():
-    n_requests = 1000
-
+async def run(config: HttpClientConfig, n_requests: int):
     with rasterio.Env(
         GDAL_INGESTED_BYTES_AT_OPEN=16384,
         GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR",
@@ -47,9 +46,9 @@ async def run():
     return WorkerState(start_time, end_time, n_requests, n_failures)
 
 
-def main():
+def main(config: HttpClientConfig, n_requests: int):
     # Run the script.
-    return asyncio.run(run())
+    return asyncio.run(run(config, n_requests))
 
 
 if __name__ == "__main__":

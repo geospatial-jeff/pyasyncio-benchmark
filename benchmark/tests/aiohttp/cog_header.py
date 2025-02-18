@@ -26,8 +26,7 @@ async def fut(session: aiohttp.ClientSession):
     await r.read()
 
 
-async def run(config: HttpClientConfig):
-    n_requests = 10000
+async def run(config: HttpClientConfig, n_requests: int):
     async with create_aiohttp_client(config) as session:
         futures = (fut(session) for _ in range(n_requests))
 
@@ -40,10 +39,10 @@ async def run(config: HttpClientConfig):
     return WorkerState(start_time, end_time, n_requests, n_failures)
 
 
-def main(config: HttpClientConfig):
+def main(config: HttpClientConfig, n_requests: int):
     # Run the script.
-    return asyncio.run(run(config))
+    return asyncio.run(run(config, n_requests))
 
 
 if __name__ == "__main__":
-    main(HttpClientConfig())
+    main(HttpClientConfig(), 1000)
