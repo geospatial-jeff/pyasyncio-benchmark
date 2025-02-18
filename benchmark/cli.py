@@ -51,6 +51,7 @@ def _run_test(
     library_name: str,
     test_name: str,
     replicas: int,
+    n_requests: int,
     debug: bool,
     pool_size: int,
     keep_alive: bool,
@@ -81,6 +82,8 @@ def _run_test(
             f"LIBRARY_NAME={library_name}",
             "--build-arg",
             f"TEST_NAME={test_name}",
+            "--build-arg",
+            f"N_REQUESTS={n_requests}",
             "--build-arg",
             f"POOL_SIZE={pool_size}",
             "--build-arg",
@@ -123,6 +126,7 @@ def client_options(f):
 @click.argument("library_name")
 @click.argument("test_name")
 @click.option("--replicas", type=int, default=1)
+@click.option("--n-requests", type=int, default=1000)
 @click.option(
     "--debug", is_flag=True, show_default=True, default=False, help="Debug mode"
 )
@@ -131,6 +135,7 @@ def run_test(
     library_name: str,
     test_name: str,
     replicas: int = 1,
+    n_requests: int = 1000,
     debug: bool = False,
     pool_size: int = DEFAULT_POOL_SIZE_PER_HOST,
     keep_alive: bool = DEFAULT_KEEP_ALIVE,
@@ -142,6 +147,7 @@ def run_test(
         library_name,
         test_name,
         replicas,
+        n_requests,
         debug,
         pool_size,
         keep_alive,
@@ -151,8 +157,9 @@ def run_test(
 
 
 @app.command
-@click.option("--library-name")
-@click.option("--test-name")
+@click.option("--library-name", type=str)
+@click.option("--test-name", type=str)
+@click.option("--n-requests", type=int, default=1000)
 @click.option("--replicas", type=int, default=1)
 @click.option(
     "--debug", is_flag=True, show_default=True, default=False, help="Debug mode"
@@ -161,6 +168,7 @@ def run_test(
 def run_all(
     library_name: str,
     test_name: str,
+    n_requests: int = 1000,
     replicas: int = 1,
     debug: bool = False,
     pool_size: int = DEFAULT_POOL_SIZE_PER_HOST,
@@ -180,6 +188,7 @@ def run_all(
                 library_name,
                 test_name,
                 replicas,
+                n_requests,
                 debug,
                 pool_size,
                 keep_alive,
@@ -214,11 +223,13 @@ def get_results(folder_path: str, sampling_interval: int = 5):
 @click.argument("library_name")
 @click.argument("test_name")
 @click.argument("run_id")
+@click.option("--n-requests", type=int, default=1000)
 @client_options
 def docker_entrypoint(
     library_name: str,
     test_name: str,
     run_id: str,
+    n_requests: int = 1000,
     pool_size: int = DEFAULT_POOL_SIZE_PER_HOST,
     keep_alive: bool = DEFAULT_KEEP_ALIVE,
     keep_alive_timeout: int = DEFAULT_KEEP_ALIVE_TIMEOUT_SECONDS,
@@ -231,4 +242,4 @@ def docker_entrypoint(
         keep_alive_timeout_seconds=keep_alive_timeout,
         use_dns_cache=use_dns_cache,
     )
-    main.run_test(library_name, test_name, run_id, client_config)
+    main.run_test(library_name, test_name, run_id, n_requests, client_config)

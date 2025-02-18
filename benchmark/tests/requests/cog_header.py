@@ -38,8 +38,7 @@ async def fut(session: requests.Session):
     await run_in_threadpool(session)
 
 
-async def run(config: HttpClientConfig):
-    n_requests = 10000
+async def run(config: HttpClientConfig, n_requests: int):
     session = create_requests_session(config)
 
     start_time = datetime.utcnow()
@@ -51,9 +50,9 @@ async def run(config: HttpClientConfig):
     return WorkerState(start_time, end_time, n_requests, n_failures)
 
 
-def main(config: HttpClientConfig):
+def main(config: HttpClientConfig, n_requests: int):
     # Run the script.
-    return asyncio.run(run(config))
+    return asyncio.run(run(config, n_requests))
 
 
 if __name__ == "__main__":
