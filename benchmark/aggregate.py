@@ -126,7 +126,7 @@ def summarize_test_results_workers(sampling_interval_seconds: int):
         if is_ec2():
             b = get_ec2_billing_info()
             all_metrics["instance_type"] = b["instance_type"]
-            all_metrics["cost_usd"] = (b["hourly_price"] / 3600) * duration_seconds
+            all_metrics["cost_usd"] = (b["hourly_cost"] / 3600) * duration_seconds
 
         results.append(all_metrics)
 
@@ -221,7 +221,7 @@ def summarize_test_results_deployment(sampling_interval_seconds: int) -> pd.Data
         if is_ec2():
             b = get_ec2_billing_info()
             all_metrics["instance_type"] = b["instance_type"]
-            all_metrics["cost_usd"] = (b["hourly_price"] / 3600) * duration_seconds
+            all_metrics["cost_usd"] = (b["hourly_cost"] / 3600) * duration_seconds
 
         results.append(all_metrics)
 
