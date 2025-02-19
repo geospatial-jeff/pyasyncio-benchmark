@@ -1,10 +1,8 @@
 import asyncio
-from datetime import datetime
 
 import httpx
 
 from benchmark import scheduling
-from benchmark.crud import WorkerState
 from benchmark.synchronization import semaphore
 from benchmark.clients import HttpClientConfig, create_httpx_client
 
@@ -29,18 +27,11 @@ async def run(config: HttpClientConfig, n_requests: int):
         config, base_url="https://sentinel-cogs.s3.amazonaws.com"
     ) as client:
         futures = (fut(client) for _ in range(n_requests))
-
-        # Schedule them using a gather.
-        start_time = datetime.utcnow()
         results = await scheduling.gather(futures)
-        end_time = datetime.utcnow()
-
-    n_failures = len([result for result in results if isinstance(result, Exception)])
-    return WorkerState(start_time, end_time, n_requests, n_failures)
+    return results
 
 
 def main(config: HttpClientConfig, n_requests: int):
-    # Run the script.
     return asyncio.run(run(config, n_requests))
 
 
