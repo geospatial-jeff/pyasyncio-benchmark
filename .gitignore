@@ -166,3 +166,4 @@ sqlite.db
 # CDK asset staging directory
 infra/.cdk.staging
 infra/cdk.out
+.DS_Store
