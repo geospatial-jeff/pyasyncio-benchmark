@@ -7,6 +7,44 @@ from typing import Iterable, Coroutine
 from benchmark.crud import WorkerState
 
 
+async def gather_with_timeout(func, n_requests, timeout) -> WorkerState:
+    """Run the function `n_requests` times, blocking until either they all complete
+    or a certain amount of time has passed.  Returns "partial results" if not all
+    coroutines finish before the timeout.
+
+    This function is the most efficient when `n_requests` is large enough to cover
+    the full timeout.
+    """
+    results = []
+    errors = []
+
+    async def _wrapper():
+        try:
+            results.append(await func())
+        except Exception as exc:
+            errors.append(exc)
+
+    start_time = datetime.utcnow()
+    while True:
+        start_time_chunk = datetime.utcnow()
+        futures = asyncio.gather(*[_wrapper() for _ in range(n_requests)])
+        end_time_gather = datetime.utcnow()
+        try:
+            await asyncio.wait_for(futures, timeout)
+            end_time_chunk = datetime.utcnow()
+            timeout = max(
+                timeout
+                - (end_time_chunk - start_time_chunk).total_seconds()
+                + (end_time_gather - start_time_chunk).total_seconds(),
+                0,
+            )
+        except TimeoutError:
+            end_time = datetime.utcnow()
+            return WorkerState(
+                start_time, end_time, len(results) + len(errors), len(errors)
+            )
+
+
 async def gather(futs: Iterable[Coroutine]) -> WorkerState:
     """Run all coroutines, blocking until they all finish."""
     # return await asyncio.gather(*futs, return_exceptions=True)
