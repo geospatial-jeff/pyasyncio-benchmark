@@ -36,16 +36,21 @@ async def fut(session: requests.Session):
     await run_in_threadpool(session)
 
 
-async def run(config: HttpClientConfig, n_requests: int):
+async def run(config: HttpClientConfig, n_requests: int, timeout: int | None):
     session = create_requests_session(config)
-    futures = (fut(session) for _ in range(n_requests))
-    results = await scheduling.gather(futures)
+    if timeout:
+        results = await scheduling.gather_with_timeout(
+            functools.partial(fut, session), n_requests, timeout
+        )
+    else:
+        futures = (fut(session) for _ in range(n_requests))
+        results = await scheduling.gather(futures)
     return results
 
 
-def main(config: HttpClientConfig, n_requests: int):
-    return asyncio.run(run(config, n_requests))
+def main(config: HttpClientConfig, n_requests: int, timeout: int | None):
+    return asyncio.run(run(config, n_requests, timeout))
 
 
 if __name__ == "__main__":
-    main(HttpClientConfig())
+    main(HttpClientConfig(), 1000, None)

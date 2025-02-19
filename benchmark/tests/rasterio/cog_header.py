@@ -27,7 +27,7 @@ async def fut():
     return await anyio.to_thread.run_sync(func)
 
 
-async def run(config: HttpClientConfig, n_requests: int):
+async def run(config: HttpClientConfig, n_requests: int, timeout: int | None):
     with rasterio.Env(
         GDAL_INGESTED_BYTES_AT_OPEN=16384,
         GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR",
@@ -35,14 +35,17 @@ async def run(config: HttpClientConfig, n_requests: int):
         AWS_REGION="us-west-2",
         CPL_VSIL_CURL_NON_CACHED=f"/vsis3/sentinel-cogs/{key}",
     ):
-        futures = (fut() for _ in range(n_requests))
-        results = await scheduling.gather(futures)
+        if timeout:
+            results = await scheduling.gather_with_timeout(fut, n_requests, timeout)
+        else:
+            futures = (fut() for _ in range(n_requests))
+            results = await scheduling.gather(futures)
     return results
 
 
-def main(config: HttpClientConfig, n_requests: int):
-    return asyncio.run(run(config, n_requests))
+def main(config: HttpClientConfig, n_requests: int, timeout: int | None):
+    return asyncio.run(run(config, n_requests, timeout))
 
 
 if __name__ == "__main__":
-    main()
+    main(HttpClientConfig(), 100, None)
