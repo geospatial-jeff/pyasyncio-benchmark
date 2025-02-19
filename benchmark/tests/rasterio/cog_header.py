@@ -1,13 +1,11 @@
 import anyio
 import asyncio
-from datetime import datetime
 import functools
 
 import rasterio
 
 from benchmark import scheduling
 from benchmark.clients import HttpClientConfig
-from benchmark.crud import WorkerState
 from benchmark.synchronization import semaphore
 
 
@@ -37,17 +35,12 @@ async def run(config: HttpClientConfig, n_requests: int):
         AWS_REGION="us-west-2",
         CPL_VSIL_CURL_NON_CACHED=f"/vsis3/sentinel-cogs/{key}",
     ):
-        start_time = datetime.utcnow()
         futures = (fut() for _ in range(n_requests))
         results = await scheduling.gather(futures)
-        end_time = datetime.utcnow()
-
-    n_failures = len([result for result in results if isinstance(result, Exception)])
-    return WorkerState(start_time, end_time, n_requests, n_failures)
+    return results
 
 
 def main(config: HttpClientConfig, n_requests: int):
-    # Run the script.
     return asyncio.run(run(config, n_requests))
 
 

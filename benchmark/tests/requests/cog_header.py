@@ -1,13 +1,11 @@
 import anyio
 import asyncio
-from datetime import datetime
 import functools
 
 import requests
 import requests.adapters
 
 from benchmark import scheduling
-from benchmark.crud import WorkerState
 from benchmark.synchronization import semaphore
 from benchmark.clients import HttpClientConfig, create_requests_session
 
@@ -40,18 +38,12 @@ async def fut(session: requests.Session):
 
 async def run(config: HttpClientConfig, n_requests: int):
     session = create_requests_session(config)
-
-    start_time = datetime.utcnow()
     futures = (fut(session) for _ in range(n_requests))
     results = await scheduling.gather(futures)
-    end_time = datetime.utcnow()
-
-    n_failures = len([result for result in results if isinstance(result, Exception)])
-    return WorkerState(start_time, end_time, n_requests, n_failures)
+    return results
 
 
 def main(config: HttpClientConfig, n_requests: int):
-    # Run the script.
     return asyncio.run(run(config, n_requests))
 
 

@@ -1,10 +1,8 @@
 import asyncio
-from datetime import datetime
 
 import s3fs
 
 from benchmark import scheduling
-from benchmark.crud import WorkerState
 from benchmark.synchronization import semaphore
 from benchmark.clients import HttpClientConfig, create_fsspec_s3
 
@@ -22,20 +20,12 @@ async def fut(filesystem: s3fs.S3FileSystem):
 
 async def run(config: HttpClientConfig, n_requests: int):
     filesystem = create_fsspec_s3(config, "us-west-2")
-
     futures = (fut(filesystem) for _ in range(n_requests))
-
-    # Schedule them using a gather.
-    start_time = datetime.utcnow()
     results = await scheduling.gather(futures)
-    end_time = datetime.utcnow()
-
-    n_failures = len([result for result in results if isinstance(result, Exception)])
-    return WorkerState(start_time, end_time, n_requests, n_failures)
+    return results
 
 
 def main(config: HttpClientConfig, n_requests: int):
-    # Run the script.
     return asyncio.run(run(config, n_requests))
 
 

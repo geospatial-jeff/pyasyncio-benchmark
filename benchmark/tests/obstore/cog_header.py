@@ -1,11 +1,9 @@
 import asyncio
-from datetime import datetime
 
 import obstore as obs
 
 from benchmark import scheduling
 from benchmark.synchronization import semaphore
-from benchmark.crud import WorkerState
 from benchmark.clients import HttpClientConfig, create_obstore_store
 
 
@@ -24,21 +22,13 @@ async def fut(store: obs.store.S3Store):
 
 async def run(config: HttpClientConfig, n_requests: int):
     n_requests = n_requests * 3
-
-    # Create the store.
     store = create_obstore_store(config, "sentinel-cogs", region_name="us-west-2")
     futures = (fut(store) for _ in range(n_requests))
-
-    start_time = datetime.utcnow()
     results = await scheduling.gather(futures)
-    end_time = datetime.utcnow()
-
-    n_failures = len([result for result in results if isinstance(result, Exception)])
-    return WorkerState(start_time, end_time, n_requests, n_failures)
+    return results
 
 
 def main(config: HttpClientConfig, n_requests: int):
-    # Run the script.
     return asyncio.run(run(config, n_requests))
 
 
