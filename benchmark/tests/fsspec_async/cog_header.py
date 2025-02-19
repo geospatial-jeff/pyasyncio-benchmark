@@ -1,4 +1,5 @@
 import asyncio
+import functools
 
 import s3fs
 
@@ -18,16 +19,21 @@ async def fut(filesystem: s3fs.S3FileSystem):
     await filesystem._cat_file(f"sentinel-cogs/{key}", start=0, end=16384)
 
 
-async def run(config: HttpClientConfig, n_requests: int):
+async def run(config: HttpClientConfig, n_requests: int, timeout: int | None):
     filesystem = create_fsspec_s3(config, "us-west-2")
-    futures = (fut(filesystem) for _ in range(n_requests))
-    results = await scheduling.gather(futures)
+    if timeout:
+        results = await scheduling.gather_with_timeout(
+            functools.partial(fut, filesystem), n_requests, timeout
+        )
+    else:
+        futures = (fut(filesystem) for _ in range(n_requests))
+        results = await scheduling.gather(futures)
     return results
 
 
-def main(config: HttpClientConfig, n_requests: int):
-    return asyncio.run(run(config, n_requests))
+def main(config: HttpClientConfig, n_requests: int, timeout: int | None):
+    return asyncio.run(run(config, n_requests, timeout))
 
 
 if __name__ == "__main__":
-    main(HttpClientConfig(), 1000)
+    main(HttpClientConfig(), 1000, None)

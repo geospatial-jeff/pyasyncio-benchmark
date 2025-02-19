@@ -12,10 +12,13 @@ def run_test(
     test_name: str,
     run_id: str,
     n_requests: int,
+    timeout: int,
     client_config: HttpClientConfig,
 ):
+    timeout = None if timeout == -1 else timeout
+
     mod = import_module(f"benchmark.tests.{library_name}.{test_name}")
-    worker_state: WorkerState = mod.main(client_config, n_requests)
+    worker_state: WorkerState = mod.main(client_config, n_requests, timeout)
 
     container_id = get_container_id()
     with sqlite3.connect(get_settings().DB_FILEPATH) as conn:

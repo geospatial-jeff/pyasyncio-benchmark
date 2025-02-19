@@ -1,4 +1,5 @@
 import asyncio
+import functools
 
 import obstore as obs
 
@@ -20,17 +21,22 @@ async def fut(store: obs.store.S3Store):
     r.to_bytes()
 
 
-async def run(config: HttpClientConfig, n_requests: int):
+async def run(config: HttpClientConfig, n_requests: int, timeout: int | None):
     n_requests = n_requests * 3
     store = create_obstore_store(config, "sentinel-cogs", region_name="us-west-2")
-    futures = (fut(store) for _ in range(n_requests))
-    results = await scheduling.gather(futures)
+    if timeout:
+        results = await scheduling.gather_with_timeout(
+            functools.partial(fut, store), n_requests, timeout
+        )
+    else:
+        futures = (fut(store) for _ in range(n_requests))
+        results = await scheduling.gather(futures)
     return results
 
 
-def main(config: HttpClientConfig, n_requests: int):
-    return asyncio.run(run(config, n_requests))
+def main(config: HttpClientConfig, n_requests: int, timeout: int | None):
+    return asyncio.run(run(config, n_requests, timeout))
 
 
 if __name__ == "__main__":
-    main(HttpClientConfig(), 1000)
+    main(HttpClientConfig(), 1000, None)
