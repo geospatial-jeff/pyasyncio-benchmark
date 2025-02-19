@@ -17,7 +17,7 @@ async def gather(futs: Iterable[Coroutine]) -> WorkerState:
     return WorkerState(start_time, end_time, len(results), n_failures)
 
 
-async def queue(futs: Iterable[Coroutine], num_workers: int = 3):
+async def queue(futs: Iterable[Coroutine], num_workers: int = 3) -> WorkerState:
     """Puts coroutines onto a queue and processes them with multiple workers"""
     failure_count = 0
 
