@@ -17,9 +17,7 @@ key = "sentinel-s2-l2a-cogs/50/C/MA/2021/1/S2A_50CMA_20210121_0_L2A/B08.tif"
 async def send_range_aioboto3(
     bucket: str, key: str, start: int, end: int, client: typing.Any | None
 ):
-    resp = await client.get_object(
-        Bucket="sentinel-cogs", Key=key, Range="bytes=0-16384"
-    )
+    resp = await client.get_object(Bucket=bucket, Key=key, Range=f"bytes={start}-{end}")
     return await resp["Body"].read()
 
 
