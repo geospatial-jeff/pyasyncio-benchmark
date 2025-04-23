@@ -35,7 +35,7 @@ def create_httpx_client(config: HttpClientConfig, **kwargs) -> httpx.Client:
         max_keepalive_connections=config.pool_size_per_host,
         keepalive_expiry=config.keep_alive_timeout_seconds,
     )
-    return httpx.Client(limits=limits, **kwargs)
+    return httpx.AsyncClient(limits=limits, **kwargs)
 
 
 def create_aiohttp_client(config: HttpClientConfig, **kwargs) -> aiohttp.ClientSession:
