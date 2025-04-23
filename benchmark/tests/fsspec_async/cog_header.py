@@ -30,6 +30,7 @@ async def fut(filesystem: s3fs.S3FileSystem):
         functools.partial(send_range_fsspec, client=filesystem),
         bucket=bucket_name,
         key=key,
+        header_size_bytes=16384,
     )
 
 

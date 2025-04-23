@@ -30,6 +30,7 @@ async def fut(s3_client):
         functools.partial(send_range_aioboto3, client=s3_client),
         bucket=bucket_name,
         key=key,
+        header_size_bytes=16384,
     )
 
 

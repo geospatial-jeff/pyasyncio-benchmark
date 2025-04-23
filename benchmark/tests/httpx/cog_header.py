@@ -34,6 +34,7 @@ async def fut(client: httpx.AsyncClient):
         functools.partial(send_range_httpx, client=client),
         bucket=bucket_name,
         key=key,
+        header_size_bytes=16384,
     )
 
 

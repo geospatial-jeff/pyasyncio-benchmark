@@ -36,6 +36,7 @@ async def fut(session: aiohttp.ClientSession):
         functools.partial(send_range_aiohttp, client=session),
         bucket=bucket_name,
         key=key,
+        header_size_bytes=16384,
     )
 
 
