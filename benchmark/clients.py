@@ -2,6 +2,7 @@ import asyncio
 from dataclasses import dataclass
 import aioboto3
 import aiohttp
+import async_tiff.store
 import httpx
 import requests.adapters
 import botocore.config
@@ -91,6 +92,21 @@ def create_obstore_store(
     return obs.store.S3Store(
         bucket,
         config={"aws_default_region": region_name, "aws_skip_signature": True},
+        client_options={
+            "pool_max_idle_per_host": str(config.pool_size_per_host),
+            "http2_keep_alive_timeout": str(config.keep_alive_timeout_seconds) + "s",
+            **kwargs,
+        },
+    )
+
+
+def create_async_tiff_s3_store(
+    config: HttpClientConfig, bucket: str, region_name: str, **kwargs
+) -> async_tiff.store.S3Store:
+    return async_tiff.store.S3Store(
+        bucket,
+        region=region_name,
+        skip_signature=True,
         client_options={
             "pool_max_idle_per_host": str(config.pool_size_per_host),
             "http2_keep_alive_timeout": str(config.keep_alive_timeout_seconds) + "s",
