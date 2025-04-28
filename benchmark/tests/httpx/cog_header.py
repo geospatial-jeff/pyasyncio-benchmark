@@ -13,7 +13,7 @@ bucket_name = "sentinel-cogs"
 key = "sentinel-s2-l2a-cogs/50/C/MA/2021/1/S2A_50CMA_20210121_0_L2A/B08.tif"
 
 
-@semaphore(100)
+@semaphore(500)
 async def send_range_httpx(
     bucket: str, key: str, start: int, end: int, client: typing.Any | None
 ):
