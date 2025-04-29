@@ -5,9 +5,10 @@ import subprocess
 import os
 import uuid
 
+import docker
 import sqlite3
 
-from benchmark.docker_utils import get_container_id
+from benchmark.docker_utils import get_container_id, block_until_container_exits
 from benchmark.crud import insert_row, WorkerState
 from benchmark.settings import get_settings
 from benchmark.clients import HttpClientConfig
@@ -62,6 +63,7 @@ def run_parameterized_test(test_config: TestConfig):
                 test.client_config.use_dns_cache,
                 params,
             )
+            block_until_container_exits(docker.from_env())
 
 
 def run_test_docker(
