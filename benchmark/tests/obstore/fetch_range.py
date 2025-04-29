@@ -17,7 +17,6 @@ async def fut(store: obs.store.S3Store, request_size: int):
 
     Semaphore allows this function to be called 500 times concurrently
     """
-    print("Requesting size - ", request_size)
     r = await obs.get_range_async(store, key, start=0, end=request_size)
     r.to_bytes()
 

@@ -140,7 +140,6 @@ def run_test(
     client_config: HttpClientConfig,
     test_params: dict | None,
 ):
-    print("TEST PARAMS - ", test_params)
     timeout = None if timeout == -1 else timeout
 
     mod = import_module(f"benchmark.tests.{library_name}.{test_name}")
