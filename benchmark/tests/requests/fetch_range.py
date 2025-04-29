@@ -19,30 +19,35 @@ async def run_in_threadpool(session: requests.Session):
 
 
 @semaphore(500)
-async def fut(session: requests.Session):
+async def fut(session: requests.Session, request_size: int):
     r = session.get(
         f"https://sentinel-cogs.s3.amazonaws.com/{key}",
-        headers={"Range": "bytes=0-16384"},
+        headers={"Range": f"bytes=0-{request_size}"},
     )
     r.raise_for_status()
     r.content
 
 
-async def run(config: HttpClientConfig, n_requests: int, timeout: int | None):
+async def run(
+    config: HttpClientConfig, n_requests: int, request_size: int, timeout: int | None
+):
     session = create_requests_session(config)
     if timeout:
         results = await scheduling.gather_with_timeout(
-            functools.partial(fut, session), n_requests, timeout
+            functools.partial(fut, session, request_size), n_requests, timeout
         )
     else:
-        futures = (fut(session) for _ in range(n_requests))
+        futures = (fut(session, request_size) for _ in range(n_requests))
         results = await scheduling.gather(futures)
     return results
 
 
-def main(config: HttpClientConfig, n_requests: int, timeout: int | None):
-    return asyncio.run(run(config, n_requests, timeout))
+def main(
+    config: HttpClientConfig, n_requests: int, timeout: int | None, params: dict | None
+):
+    request_size = params.get("request_size", 16384)
+    return asyncio.run(run(config, n_requests, request_size, timeout))
 
 
 if __name__ == "__main__":
-    main(HttpClientConfig(), 1000, None)
+    main(HttpClientConfig(), 1000, None, None)

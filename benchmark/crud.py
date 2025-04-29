@@ -1,6 +1,7 @@
 import sqlite3
 from datetime import datetime
 from dataclasses import dataclass
+import json
 
 from benchmark.clients import HttpClientConfig
 
@@ -25,9 +26,10 @@ def insert_row(
     run_id: str,
     state: WorkerState,
     client_config: HttpClientConfig,
+    test_params: dict,
 ) -> None:
     # Track state about each worker
-    sql = "INSERT INTO workers VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)"
+    sql = "INSERT INTO workers VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
     cur = conn.cursor()
     cur.execute(
         sql,
@@ -45,6 +47,7 @@ def insert_row(
             client_config.keep_alive,
             client_config.keep_alive_timeout_seconds,
             client_config.use_dns_cache,
+            json.dumps(test_params),
         ),
     )
     conn.commit()

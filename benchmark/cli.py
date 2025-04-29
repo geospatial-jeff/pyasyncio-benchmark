@@ -1,9 +1,7 @@
 import os
-from collections import defaultdict
 import functools
 import click
-import subprocess
-import uuid
+import json
 
 import docker
 
@@ -20,95 +18,12 @@ from benchmark.clients import (
     DEFAULT_KEEP_ALIVE_TIMEOUT_SECONDS,
     DEFAULT_POOL_SIZE_PER_HOST,
 )
-
-
-def collect_tests() -> dict:
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-
-    tests = defaultdict(list)
-    for path, _, files in os.walk(dir_path + "/tests"):
-        for name in files:
-            if not name.endswith(".py"):
-                continue
-            if name.endswith("__init__.py"):
-                continue
-
-            full_path = os.path.join(path, name)
-            splits = full_path.split("/")
-
-            library_name = splits[-2]
-            test_name = splits[-1].replace(".py", "")
-            tests[library_name].append(test_name)
-    return dict(tests)
+from benchmark.parameterize import TestConfig
 
 
 @click.group
 def app():
     pass
-
-
-def _run_test(
-    library_name: str,
-    test_name: str,
-    replicas: int,
-    n_requests: int,
-    timeout: int,
-    debug: bool,
-    pool_size: int,
-    keep_alive: bool,
-    keep_alive_timeout: int,
-    use_dns_cache: bool,
-):
-    all_tests = collect_tests()
-
-    # Validations
-    try:
-        library = all_tests[library_name]
-    except KeyError:
-        raise ValueError(f"Library {library_name} not found.")
-
-    if test_name not in library:
-        raise ValueError(f"Test {test_name} not found.")
-
-    # Build the container.
-    image_tag = f"{library_name}-{test_name}"
-    subprocess.run(
-        [
-            "docker",
-            "build",
-            ".",
-            "-t",
-            f"pyasyncio-benchmark:{image_tag}",
-            "--build-arg",
-            f"LIBRARY_NAME={library_name}",
-            "--build-arg",
-            f"TEST_NAME={test_name}",
-            "--build-arg",
-            f"N_REQUESTS={n_requests}",
-            "--build-arg",
-            f"TIMEOUT={timeout}",
-            "--build-arg",
-            f"POOL_SIZE={pool_size}",
-            "--build-arg",
-            f"KEEP_ALIVE={keep_alive}",
-            "--build-arg",
-            f"KEEP_ALIVE_TIMEOUT={keep_alive_timeout}",
-            "--build-arg",
-            f"USE_DNS_CACHE={use_dns_cache}",
-            "--build-arg",
-            f"RUN_ID={str(uuid.uuid4())}",
-        ]
-    )
-
-    # Run the docker-compose stack
-    command = ["docker", "compose", "up"]
-    if not debug:
-        command.append("-d")
-    container_env = os.environ.copy() | {
-        "IMAGE_TAG": image_tag,
-        "REPLICA_COUNT": str(replicas),
-    }
-    subprocess.run(command, env=container_env)
 
 
 def client_options(f):
@@ -148,7 +63,7 @@ def run_test(
     use_dns_cache: bool = DEFAULT_USE_DNS_CACHE,
 ):
     """Run a single test."""
-    _run_test(
+    main.run_test_docker(
         library_name,
         test_name,
         replicas,
@@ -187,12 +102,12 @@ def run_all(
     """Run all available tests."""
     docker_client = docker.from_env()
 
-    all_tests = collect_tests()
+    all_tests = main.collect_tests()
     click.echo(f"Collected tests - {all_tests}")
     for library_name, tests in all_tests.items():
         for test_name in tests:
             click.echo(f"Running test {library_name}.{test_name}")
-            _run_test(
+            main.run_test_docker(
                 library_name,
                 test_name,
                 replicas,
@@ -229,6 +144,15 @@ def get_results(folder_path: str, sampling_interval: int = 5):
 
 
 @app.command
+@click.argument(
+    "config_file_path", type=click.Path(exists=True, file_okay=True, readable=True)
+)
+def run_parameterized_test(config_file_path: str):
+    """Run parameterized test."""
+    main.run_parameterized_test(TestConfig.from_yaml(config_file_path))
+
+
+@app.command
 @click.argument("library_name")
 @click.argument("test_name")
 @click.argument("run_id")
@@ -253,4 +177,8 @@ def docker_entrypoint(
         keep_alive_timeout_seconds=keep_alive_timeout,
         use_dns_cache=use_dns_cache,
     )
-    main.run_test(library_name, test_name, run_id, n_requests, timeout, client_config)
+    test_params = os.getenv("TEST_PARAMS", str({})).replace("'", '"')
+    test_params = json.loads(test_params[1:-1])
+    main.run_test(
+        library_name, test_name, run_id, n_requests, timeout, client_config, test_params
+    )

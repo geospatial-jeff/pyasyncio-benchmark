@@ -43,9 +43,11 @@ async def run(config: HttpClientConfig, n_requests: int, timeout: int | None):
     return results
 
 
-def main(config: HttpClientConfig, n_requests: int, timeout: int | None):
+def main(
+    config: HttpClientConfig, n_requests: int, timeout: int | None, params: dict | None
+):
     return asyncio.run(run(config, n_requests, timeout))
 
 
 if __name__ == "__main__":
-    main(HttpClientConfig(), 100, None)
+    main(HttpClientConfig(), 100, None, None)
