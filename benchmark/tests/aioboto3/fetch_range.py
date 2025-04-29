@@ -26,10 +26,12 @@ async def fut(s3_client, request_size: int):
 async def run(
     config: HttpClientConfig, n_requests: int, request_size: int, timeout: int | None
 ):
+    print("test run starting!")
     async with create_aioboto3_s3_client(
         config, "us-west-2", signature_version=UNSIGNED
     ) as s3_client:
         if timeout:
+            print("running test with timeout - ", timeout)
             results = await scheduling.gather_with_timeout(
                 functools.partial(fut, s3_client, request_size), n_requests, timeout
             )
@@ -39,12 +41,11 @@ async def run(
     return results
 
 
-def main(
-    config: HttpClientConfig, n_requests: int, timeout: int | None, params: dict | None
-):
+def main(config: HttpClientConfig, n_requests: int, timeout: int | None, params: dict):
     request_size = params.get("request_size", 16384)
-    return asyncio.run(run(config, n_requests, timeout, request_size))
+    return asyncio.run(run(config, n_requests, request_size, timeout))
 
 
 if __name__ == "__main__":
-    main(HttpClientConfig(), 1000, None, None)
+    print("inside dunder main")
+    main(HttpClientConfig(), 1000, None, {})

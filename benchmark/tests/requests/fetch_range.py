@@ -42,12 +42,10 @@ async def run(
     return results
 
 
-def main(
-    config: HttpClientConfig, n_requests: int, timeout: int | None, params: dict | None
-):
+def main(config: HttpClientConfig, n_requests: int, timeout: int | None, params: dict):
     request_size = params.get("request_size", 16384)
     return asyncio.run(run(config, n_requests, request_size, timeout))
 
 
 if __name__ == "__main__":
-    main(HttpClientConfig(), 1000, None, None)
+    main(HttpClientConfig(), 1000, None, {})
