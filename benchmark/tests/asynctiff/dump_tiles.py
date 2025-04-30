@@ -15,9 +15,10 @@ key = "7/28/49/0231102/tile.tif"
 
 
 @semaphore(500)
-async def fetch_tile(tiff: TIFF, x: int, y: int, z: int):
-    b = await tiff.fetch_tile(x, y, z)
-    return b
+async def fetch_and_decode_tile(tiff: TIFF, x: int, y: int, z: int):
+    tile = await tiff.fetch_tile(x, y, z)
+    decoded = await tile.decode_async()
+    return decoded
 
 
 async def fut(store: async_tiff.store.S3Store):
@@ -33,7 +34,7 @@ async def fut(store: async_tiff.store.S3Store):
     tile_requests = []
     for x in range(n_tiles_width):
         for y in range(n_tiles_height):
-            tile_requests.append(fetch_tile(tiff, x, y, 0))
+            tile_requests.append(fetch_and_decode_tile(tiff, x, y, 0))
 
     await asyncio.gather(*tile_requests)
 
