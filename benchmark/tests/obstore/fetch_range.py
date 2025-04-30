@@ -11,7 +11,7 @@ from benchmark.clients import HttpClientConfig, create_obstore_store
 key = "sentinel-s2-l2a-cogs/50/C/MA/2021/1/S2A_50CMA_20210121_0_L2A/B08.tif"
 
 
-@semaphore(500)
+@semaphore(100)
 async def fut(store: obs.store.S3Store, request_size: int):
     """Request the first 16KB of a file, simulating COG header request.
 
@@ -24,7 +24,6 @@ async def fut(store: obs.store.S3Store, request_size: int):
 async def run(
     config: HttpClientConfig, n_requests: int, request_size: int, timeout: int | None
 ):
-    n_requests = n_requests * 3
     store = create_obstore_store(config, "sentinel-cogs", region_name="us-west-2")
     if timeout:
         results = await scheduling.gather_with_timeout(

@@ -3,8 +3,9 @@ import functools
 import typing
 
 import aiohttp
+import mercantile
 from cog_layers.reader.cog import open_cog
-from cog_layers.reader.tiler import request_metatile, get_seed_tile
+from cog_layers.reader.tiler import get_seed_tile, request_xyz_tile
 
 from benchmark import scheduling
 from benchmark.synchronization import semaphore
@@ -40,12 +41,12 @@ async def fut(session: aiohttp.ClientSession):
 
     # Request every tile in the pyramid from Z7 -> Z12
     seed_tile = get_seed_tile(cog)
-
-    futs = []
-    for idx, _ in enumerate(range(7, 12 + 1)):
-        futs.append(request_metatile(cog, seed_tile, size=2**idx))
-
-    await asyncio.gather(*futs)
+    futs = [request_xyz_tile(cog, seed_tile)]
+    children = mercantile.children(seed_tile, zoom=12)
+    for child in children:
+        futs.append(request_xyz_tile(cog, child))
+    results = await scheduling.gather(futs)
+    return results
 
 
 async def run(config: HttpClientConfig, n_requests: int, timeout: int | None):
@@ -61,9 +62,9 @@ async def run(config: HttpClientConfig, n_requests: int, timeout: int | None):
     return results
 
 
-def main(config: HttpClientConfig, n_requests: int, timeout: int | None):
+def main(config: HttpClientConfig, n_requests: int, timeout: int | None, params: dict):
     return asyncio.run(run(config, n_requests, timeout))
 
 
 if __name__ == "__main__":
-    main(HttpClientConfig(), 10, None)
+    main(HttpClientConfig(), 1, None, {})
