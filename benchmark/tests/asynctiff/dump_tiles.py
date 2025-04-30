@@ -14,13 +14,13 @@ bucket_name = "cog-layers-glad"
 key = "7/28/49/0231102/tile.tif"
 
 
-@semaphore(500)
 async def fetch_and_decode_tile(tiff: TIFF, x: int, y: int, z: int):
     tile = await tiff.fetch_tile(x, y, z)
     decoded = await tile.decode_async()
     return decoded
 
 
+@semaphore(2)
 async def fut(store: async_tiff.store.S3Store):
     """Request the first 16KB of a file, simulating COG header request.
 
