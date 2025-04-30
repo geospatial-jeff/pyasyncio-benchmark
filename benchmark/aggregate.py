@@ -202,6 +202,7 @@ def summarize_test_results_deployment(sampling_interval_seconds: int) -> pd.Data
         all_metrics = {
             "library_name": group.iloc[0].library_name,
             "test_name": group.iloc[0].test_name,
+            "test_params": group.iloc[0].test_params,
             "start_time": start_time.strftime("%Y-%m-%d %H:%M:%S.%f"),
             "end_time": end_time.strftime("%Y-%m-%d %H:%M:%S.%f"),
             "number_requests": num_requests,
