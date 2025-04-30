@@ -26,6 +26,7 @@ rasterio = "^1.4.3"
 numpy = "^2.0.0"
 async-tiff = "^0.1.0"
 cog-layers = "^0.1.0"
+imagecodecs = "==2025.3.30"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.0.1"
