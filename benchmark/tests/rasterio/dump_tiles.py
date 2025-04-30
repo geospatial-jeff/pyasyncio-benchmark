@@ -53,7 +53,8 @@ async def run(config: HttpClientConfig, n_requests: int, timeout: int | None):
         GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR",
         AWS_NO_SIGN_REQUEST="YES",
         AWS_REGION="us-west-2",
-        CPL_VSIL_CURL_NON_CACHED=f"/vsis3/sentinel-cogs/{key}",
+        CPL_VSIL_CURL_NON_CACHED=f"/vsis3/{bucket_name}/{key}",
+        GDAL_CACHEMAX=0,
     ):
         if timeout:
             results = await scheduling.gather_with_timeout(fut, n_requests, timeout)
