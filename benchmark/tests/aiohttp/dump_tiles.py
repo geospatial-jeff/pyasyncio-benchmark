@@ -16,7 +16,6 @@ bucket_name = "cog-layers-glad"
 key = "7/28/49/0231102/tile.tif"
 
 
-@semaphore(100)
 async def send_range_aiohttp(
     bucket: str, key: str, start: int, end: int, client: typing.Any | None = None
 ):
@@ -28,6 +27,7 @@ async def send_range_aiohttp(
     return await r.read()
 
 
+@semaphore(2)
 async def fut(session: aiohttp.ClientSession):
     """Request the first 16KB of a file, simulating COG header request.
 
