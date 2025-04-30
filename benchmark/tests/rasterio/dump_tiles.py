@@ -41,7 +41,7 @@ def task():
             executor.map(process, windows)
 
 
-@semaphore(500)
+@semaphore(2)
 async def fut():
     func = functools.partial(task)
     return await anyio.to_thread.run_sync(func)
