@@ -22,7 +22,6 @@ def task():
     """
     with rasterio.open(f"s3://{bucket_name}/{key}") as src:
         windows = [window for _, window in src.block_windows()]
-        print(len(windows))
 
         # We cannot write to the same file from multiple threads
         # without causing race conditions. To safely read/write
@@ -32,8 +31,7 @@ def task():
 
         def process(window):
             with read_lock:
-                arr = src.read(window=window)
-                print(arr.shape)
+                src.read(window=window)
 
         # We map the process() function over the list of
         # windows.
