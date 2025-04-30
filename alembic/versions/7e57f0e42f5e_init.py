@@ -35,6 +35,7 @@ def upgrade() -> None:
         sa.Column("keep_alive", sa.BOOLEAN, nullable=False),
         sa.Column("keep_alive_timeout_seconds", sa.VARCHAR, nullable=False),
         sa.Column("use_dns_cache", sa.BOOLEAN, nullable=False),
+        sa.Column("test_params", sa.JSON, nullable=False),
     )
 
 

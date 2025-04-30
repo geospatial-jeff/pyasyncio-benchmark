@@ -1,0 +1,10 @@
+tests:
+  - library_name: obstore
+    test_name: fetch_range
+    timeout: 30
+    n_requests: 10000
+    replicas: 1
+    debug: True
+    params:
+      request_size:
+        expression: "[2**n for n in range(14, 20)]"
