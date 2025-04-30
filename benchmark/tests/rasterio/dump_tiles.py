@@ -1,8 +1,6 @@
 import anyio
 import asyncio
 import functools
-import threading
-import concurrent.futures
 
 import rasterio
 
@@ -22,26 +20,11 @@ def task():
     """
     with rasterio.open(f"s3://{bucket_name}/{key}") as src:
         windows = [window for _, window in src.block_windows()]
-        print(len(windows))
-
-        # We cannot write to the same file from multiple threads
-        # without causing race conditions. To safely read/write
-        # from multiple threads, we use a lock to protect the
-        # DatasetReader/Writer
-        read_lock = threading.Lock()
-
-        def process(window):
-            with read_lock:
-                arr = src.read(window=window)
-                print(arr.shape)
-
-        # We map the process() function over the list of
-        # windows.
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            executor.map(process, windows)
+        for window in windows:
+            src.read(window=window)
 
 
-@semaphore(2)
+@semaphore(10)
 async def fut():
     func = functools.partial(task)
     return await anyio.to_thread.run_sync(func)
