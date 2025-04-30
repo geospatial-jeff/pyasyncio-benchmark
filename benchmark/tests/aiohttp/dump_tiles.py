@@ -2,6 +2,7 @@ import asyncio
 import functools
 import typing
 
+import imagecodecs
 import aiohttp
 import mercantile
 from cog_layers.reader.cog import open_cog
@@ -27,6 +28,12 @@ async def send_range_aiohttp(
     return await r.read()
 
 
+async def request_and_decode_tile(cog, tile):
+    tile = await request_xyz_tile(cog, tile)
+    decoded = imagecodecs.jpeg_decode(tile)
+    return decoded
+
+
 @semaphore(2)
 async def fut(session: aiohttp.ClientSession):
     """Request the first 16KB of a file, simulating COG header request.
@@ -41,10 +48,10 @@ async def fut(session: aiohttp.ClientSession):
 
     # Request every tile in the pyramid from Z7 -> Z12
     seed_tile = get_seed_tile(cog)
-    futs = [request_xyz_tile(cog, seed_tile)]
+    futs = [request_and_decode_tile(cog, seed_tile)]
     children = mercantile.children(seed_tile, zoom=12)
     for child in children:
-        futs.append(request_xyz_tile(cog, child))
+        futs.append(request_and_decode_tile(cog, child))
     results = await scheduling.gather(futs)
     return results
 
