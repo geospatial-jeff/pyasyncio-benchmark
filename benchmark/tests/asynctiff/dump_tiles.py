@@ -55,4 +55,4 @@ def main(config: HttpClientConfig, n_requests: int, timeout: int | None, params:
 
 
 if __name__ == "__main__":
-    main(HttpClientConfig(), 5, None, {})
+    main(HttpClientConfig(), 1, None, {})
