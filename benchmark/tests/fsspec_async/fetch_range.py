@@ -32,7 +32,6 @@ async def run(
         futures = (fut(filesystem, request_size) for _ in range(n_requests))
         results = await scheduling.gather(futures)
 
-    filesystem.close_session()
     return results
 
 
